@@ -2,49 +2,74 @@ using System;
 using System.Threading;
 using UnityEngine;
 using CodeArchitect.Manager.Event;
+using Oculus.Interaction.HandGrab;
 using UI;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
+/// <summary>
+/// main使用单例模式，提供方法用于控制面板切换、加载模型、重新生成模型
+/// </summary>
 public class Main : MonoBehaviour
 {
+    public HandPoseInteraction handPoseInteraction;
     public GameObject _mainCanvas;
-
-    private void Awake()
+    private static Main _instance;//私有静态变量，属于类本身而不属于某个实例
+    public static Main Instance//公共静态属性，封装金泰字段的访问
     {
-        EventCenter.Instance.AddListener<String>(EventName.ModelLoadFinish, ChangePanel);
-        EventCenter.Instance.AddListener<String>(EventName.RespawnModel, RespawnModel);
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<Main>();
+            }
+
+            if (_instance == null)
+            {
+                GameObject obj = new GameObject("Main");
+                _instance = obj.AddComponent<Main>();
+            }
+            return _instance;
+        }
     }
     void Start()
     {
         //显示菜单panel
         UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
     }
-
-    private void ChangePanel(String modelName)
+    public void LoadModel(Button button)
     {
-        UI3DManager.Instance.HidePanel("MainPanel", () => { _mainCanvas.SetActive(false); });
-
+            ResourceManager.Instance.LoadAsync<GameObject>(button.name,(obj) =>
+            {
+                obj.transform.position = new Vector3(0,0,1);
+                EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
+                UI3DManager.Instance.HidePanel("MainPanel", () =>
+                {
+                    _mainCanvas.SetActive(false);
+                });
+                Debug.LogWarning($"{obj.name}与 交互面板 模型显示成功");
+            });
     }
-
-    private void RespawnModel(string modelName)
+    
+    public void RespawnModel(string modelName)
     {
-        GameObject AbandonedModel = GameObject.Find(modelName);
-        if (AbandonedModel != null)
+        GameObject abandonedModel = GameObject.Find(modelName);
+        if (abandonedModel != null)
         {
-            Destroy(AbandonedModel);
+            Destroy(abandonedModel);
             modelName = RemoveClone(modelName);
             ResourceManager.Instance.LoadAsync<GameObject>(modelName,
                 (obj) =>
                 {
                     obj.transform.position = new Vector3(0, 0, 1);
-                    EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish);
+                    EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
                 });
+
             Debug.LogWarning("模型重新成功成功");
         }
         else
         {
             Debug.LogError($"没有找到模型{modelName}");
-
         }
     }
     private string RemoveClone(string name)
@@ -55,11 +80,12 @@ public class Main : MonoBehaviour
         }
         return name;
     }
-    private void OnDestroy()
+    void OnDestroy()
     {
-        EventCenter.Instance.RemoveListener<String>(EventName.ModelLoadFinish, ChangePanel);
-        EventCenter.Instance.RemoveListener<String>(EventName.RespawnModel, RespawnModel);
-
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
-    //test
+
 }

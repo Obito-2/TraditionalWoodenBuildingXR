@@ -6,6 +6,7 @@ namespace UI
     public class InteractPanel : BaseFadePanel
     {
         private ModelInteraction _modelInteraction;
+        [SerializeField]
         private Button[] _buttonsList;
   
         private Text Modelinfo;
@@ -36,7 +37,7 @@ namespace UI
                     _modelInteraction.ExplodeModel();
                     break;
                 case "Reset":
-                    _modelInteraction.ResPawnModel();
+                    Main.Instance.RespawnModel(this.transform.root.gameObject.name);
                     break;
                 case "Anchor":
                     PanelAnchor();

@@ -8,22 +8,21 @@ using UnityEngine.UI;
 
 public class MainPanel : BaseFadePanel
 {
-    public Button douGongButton;
-    private void Start()
+    [SerializeField]
+    private Button[] _modelButtonList;
+    protected override void Awake()
     {
-        if (douGongButton != null) {
-            douGongButton.onClick.AddListener(ShowModel);
+        base.Awake();
+        _modelButtonList = transform.GetComponentsInChildren<Button>();
+        foreach (var button in _modelButtonList)
+        {
+            button.onClick.AddListener(() => {onButtonClicked(button);});//使用lambda表达式监听外部作用域函数
         }
+        
     }
-    private void ShowModel()
+
+    private  void onButtonClicked(Button button)
     {
-        ResourceManager.Instance.LoadAsync<GameObject>("DouGong",(obj) =>
-            {
-                obj.transform.position = new Vector3(0,0,1);
-                EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
-        });
-        Debug.LogWarning("模型显示成功");
-        //testGIt
+        Main.Instance.LoadModel(button);
     }
-    //test2
 }

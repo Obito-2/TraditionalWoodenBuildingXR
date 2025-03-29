@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 
 public class ModelInteraction : MonoBehaviour
 {
-    [FormerlySerializedAs("partModel")] [SerializeField]
+    [SerializeField]
     private GameObject[] partModels;//模型子物体
 
     public float moveDistance = 0.2f;
@@ -56,13 +56,11 @@ public class ModelInteraction : MonoBehaviour
         ShowUI();
     }
     private void ShowUI()
-    
     {
         UI3DManager.Instance.ShowPanelOnSpecificCanvas<InteractPanel>(nameof(InteractPanel), canvasTransform);
     }
     public void ExplodeModel()
     {
-
         for (int i = 0; i < partModels.Length; i++)
         {
             ModelSplit(partModels[i], -_moveDirection[i]);
@@ -79,11 +77,7 @@ public class ModelInteraction : MonoBehaviour
 
         Debug.Log("模型组合");
     }
-
-    public void ResPawnModel()
-    {
-        EventCenter.Instance.TriggerEvent(EventName.RespawnModel,this.gameObject.name);
-    }
+    
     private void ModelSplit(GameObject partModel, Vector3 moveDir)
     {
         iTween.MoveAdd(partModel, iTween.Hash("amount", moveDir * moveDistance,
@@ -92,16 +86,5 @@ public class ModelInteraction : MonoBehaviour
                                                 "easetype", iTween.EaseType.easeInOutQuad,
                                                 "looptype", iTween.LoopType.none
             ));
-    }
-
-    private void VisualizeMovePath()
-    {
-        for (int i = 0; i < partModels.Length; i++)
-        {
-            Vector3 startPos = partModels[i].transform.position;
-            Vector3 endPos = startPos + _moveDirection[i] * moveDistance;
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(startPos, endPos);
-        }
     }
 }

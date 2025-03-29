@@ -8,34 +8,57 @@ using UnityEngine;
 
 public class HandPoseInteraction : MonoBehaviour
 {
-    private ModelInteraction modelInteraction;
+    private  ModelInteraction modelInteraction;
     public SelectorUnityEventWrapper PoseLeft;
     public SelectorUnityEventWrapper PoseRight;
+    private Action ModelInteractionAction;
     private void Awake()
     {
-        modelInteraction = this.transform.root.GetComponent<ModelInteraction>();
         PoseLeft.WhenSelected.AddListener(OnPoseLeftSelected);
         PoseRight.WhenSelected.AddListener(OnPoseRightSelected);
-        EventCenter.Instance.AddListener<String>(EventName.ModelLoadFinish,GetModelInteraction);
+        
+        EventCenter.Instance.AddListener<String>(EventName.ModelLoadFinish,(modelName) =>
+        {
+            AddModelInteractionAction(modelName);
+        });
     }
 
-    //TODO:重新生成模型，不能使用手势交互
-    private void GetModelInteraction(String modelName)
+    private void Update()
     {
-        modelInteraction = GameObject.Find(modelName).GetComponent<ModelInteraction>();
+        ModelInteractionAction?.Invoke();
+    }
+
+    private void AddModelInteractionAction(string modelName)
+    {
+        ModelInteractionAction = () =>
+        {
+            modelInteraction = null;//清除历史模型引用，否则会因为destroy后丢失引用报错
+            
+            if (modelInteraction == null)
+            {
+                modelInteraction = GameObject.Find(modelName).GetComponent<ModelInteraction>();
+            }
+            else
+            {
+                ClearData();//如果已经找到modelInteraction组件，则清空委托放置重复调用
+            }
+        };
+    }
+
+    private void ClearData()
+    {
+        ModelInteractionAction = null;
     }
     private void OnPoseLeftSelected()
     {
-        modelInteraction.ExplodeModel();
+        modelInteraction?.ExplodeModel();
     }
     private void OnPoseRightSelected()
     {
-        modelInteraction.CombinationModel();
+        modelInteraction?.CombinationModel();
     }
     private void OnDestroy()
     {
-        PoseLeft.WhenSelected.RemoveListener(OnPoseLeftSelected);
-        PoseRight.WhenSelected.RemoveListener(OnPoseRightSelected);
-        EventCenter.Instance.RemoveListener<String>(EventName.ModelLoadFinish,GetModelInteraction);
+        EventCenter.Instance.RemoveListener<String>(EventName.ModelLoadFinish,AddModelInteractionAction);
     }
 }

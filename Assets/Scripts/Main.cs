@@ -12,7 +12,7 @@ using UnityEngine.UI;
 /// </summary>
 public class Main : MonoBehaviour
 {
-    public HandPoseInteraction handPoseInteraction;
+    //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质
     public GameObject _mainCanvas;
     private static Main _instance;//私有静态变量，属于类本身而不属于某个实例
     public static Main Instance//公共静态属性，封装金泰字段的访问
@@ -50,7 +50,6 @@ public class Main : MonoBehaviour
                 Debug.LogWarning($"{obj.name}与 交互面板 模型显示成功");
             });
     }
-    
     public void RespawnModel(string modelName)
     {
         GameObject abandonedModel = GameObject.Find(modelName);
@@ -80,6 +79,8 @@ public class Main : MonoBehaviour
         }
         return name;
     }
+    
+    //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质
     void OnDestroy()
     {
         if (_instance == this)

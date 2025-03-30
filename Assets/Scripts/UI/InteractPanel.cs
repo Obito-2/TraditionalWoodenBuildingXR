@@ -1,3 +1,5 @@
+using System;
+using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,18 +8,20 @@ namespace UI
     public class InteractPanel : BaseFadePanel
     {
         private ModelInteraction _modelInteraction;
+        private JigsawInteraction _jigsawInteraction;
         [SerializeField]
         private Button[] _buttonsList;
   
         private Text Modelinfo;
-        
+
         // Start is called before the first frame update
         private void Start()
         {
             _modelInteraction = this.transform.root.GetComponent<ModelInteraction>();
-            if (_modelInteraction == null)
+            _jigsawInteraction = this.transform.root.GetComponent<JigsawInteraction>();
+            if (_modelInteraction == null || _jigsawInteraction == null)
             {
-                Debug.LogError($"There is no {nameof(ModelInteraction)}.");
+                Debug.LogError($"InteractPanel获取交互组件失败.");
             }
             _buttonsList = transform.GetComponentsInChildren<Button>();
             foreach (var button in _buttonsList)
@@ -41,6 +45,9 @@ namespace UI
                     break;
                 case "Anchor":
                     PanelAnchor();
+                    break;
+                case"Jigsaw":
+                    _jigsawInteraction.JigsawInitial();
                     break;
             } 
         }

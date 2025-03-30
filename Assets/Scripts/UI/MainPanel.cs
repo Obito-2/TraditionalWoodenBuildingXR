@@ -3,25 +3,43 @@ using System.Collections;
 using System.Collections.Generic;
 using CodeArchitect.Manager.Event;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
+
 public class MainPanel : BaseFadePanel
 {
-    [SerializeField]
-    private Button[] _modelButtonList;
+    [SerializeField] private Button[] _modelButtonList;
+
     protected override void Awake()
     {
         base.Awake();
         _modelButtonList = transform.GetComponentsInChildren<Button>();
         foreach (var button in _modelButtonList)
         {
-            button.onClick.AddListener(() => {onButtonClicked(button);});//使用lambda表达式监听外部作用域函数
+            button.onClick.AddListener(() => { onButtonClicked(button); }); //使用lambda表达式监听外部作用域函数
         }
-        
     }
 
-    private  void onButtonClicked(Button button)
+    private void Start()
+    {
+        Button FirstButton;
+        FirstButton = _modelButtonList[0];
+        StartCoroutine(DelayClickButton(FirstButton));
+    }
+
+    private IEnumerator DelayClickButton(Button button)
+    {
+        yield return new WaitForSeconds(0.5f);
+        if (button != null)
+        {
+            ExecuteEvents.Execute(button.gameObject, new PointerEventData(EventSystem.current),
+                ExecuteEvents.pointerClickHandler);
+        }
+    }
+
+    private void onButtonClicked(Button button)
     {
         Main.Instance.LoadModel(button);
     }

@@ -56,7 +56,7 @@ public class Main : MonoBehaviour
         if (abandonedModel != null)
         {
             Destroy(abandonedModel);
-            modelName = RemoveClone(modelName);
+            modelName = MyTools.RemoveClone(modelName);
             ResourceManager.Instance.LoadAsync<GameObject>(modelName,
                 (obj) =>
                 {
@@ -70,14 +70,6 @@ public class Main : MonoBehaviour
         {
             Debug.LogError($"没有找到模型{modelName}");
         }
-    }
-    private string RemoveClone(string name)
-    {
-        if (name.EndsWith("(Clone)"))
-        {
-            return name.Replace("(Clone)", "").Trim();
-        }
-        return name;
     }
     
     //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质

@@ -28,7 +28,10 @@ namespace UI
             {
              button.onClick.AddListener(() => ButtonOnClick(button));   
             }
-
+            
+            Button jigsawButton = transform.Find("Jigsaw").GetComponent<Button>();
+            StartCoroutine(MyTools.DelayClickButton(jigsawButton));
+            
         }
         private void ButtonOnClick(Button button)
         {

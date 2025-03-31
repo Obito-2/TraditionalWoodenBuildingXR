@@ -1,22 +1,40 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class JigsawPiece : MonoBehaviour
 {
-    private InteractableUnityEventWrapper handGrabEventWrapper;
+    private JigsawInteraction jigsawInteraction;
+    private PointableUnityEventWrapper handGrabEventWrapper;
+    private Grabbable _grabbable;
+    
     //监听是否被抓取
-    //控制selected 与 unselected后执行的方法
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        
+
+        jigsawInteraction = this.transform.root.GetComponent<JigsawInteraction>();
+        _grabbable = this.GetComponent<Grabbable>();
+        handGrabEventWrapper = this.GetComponent<PointableUnityEventWrapper>();
+        handGrabEventWrapper.InjectPointable(_grabbable);
+        handGrabEventWrapper.WhenSelect.AddListener(WhenSelectPiece);
+        handGrabEventWrapper.WhenUnselect.AddListener(WhenUnselectPiece);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void WhenSelectPiece(PointerEvent pointerEvent)
     {
-        
+        //当前piece被selected时，更改与之对应的gohstModel的材质，进行提示
+        Debug.LogWarning("Pointer Type: " + pointerEvent.Type);
+        jigsawInteraction.HeilightPiece(this.gameObject);
     }
+
+    private void WhenUnselectPiece(PointerEvent pointerEvent)
+    {
+        jigsawInteraction.CancelHeilightPiece(gameObject);
+    }
+
 }

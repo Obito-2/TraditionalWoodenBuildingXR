@@ -26,19 +26,9 @@ public class MainPanel : BaseFadePanel
     {
         Button FirstButton;
         FirstButton = _modelButtonList[0];
-        StartCoroutine(DelayClickButton(FirstButton));
+        StartCoroutine(MyTools.DelayClickButton(FirstButton));
     }
-
-    private IEnumerator DelayClickButton(Button button)
-    {
-        yield return new WaitForSeconds(0.5f);
-        if (button != null)
-        {
-            ExecuteEvents.Execute(button.gameObject, new PointerEventData(EventSystem.current),
-                ExecuteEvents.pointerClickHandler);
-        }
-    }
-
+    
     private void onButtonClicked(Button button)
     {
         Main.Instance.LoadModel(button);

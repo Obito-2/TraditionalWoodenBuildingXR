@@ -28,13 +28,12 @@ public class JigsawPiece : MonoBehaviour
     private void WhenSelectPiece(PointerEvent pointerEvent)
     {
         //当前piece被selected时，更改与之对应的gohstModel的材质，进行提示
-        Debug.LogWarning("Pointer Type: " + pointerEvent.Type);
-        jigsawInteraction.HeilightPiece(this.gameObject);
+        jigsawInteraction.HeilightPiece(gameObject);
     }
 
     private void WhenUnselectPiece(PointerEvent pointerEvent)
     {
         jigsawInteraction.CancelHeilightPiece(gameObject);
+        jigsawInteraction.IsJigsawUnselectedParts(gameObject);
     }
-
 }

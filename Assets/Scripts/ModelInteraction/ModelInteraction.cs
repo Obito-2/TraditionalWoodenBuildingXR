@@ -63,7 +63,7 @@ public class ModelInteraction : MonoBehaviour
     {
         for (int i = 0; i < partModels.Length; i++)
         {
-            ModelSplit(partModels[i], -_moveDirection[i]);
+            PartModelMove(partModels[i], -_moveDirection[i]);
         }
         Debug.Log("模型炸开");
     }
@@ -72,13 +72,12 @@ public class ModelInteraction : MonoBehaviour
 
         for (int i = 0; i < partModels.Length; i++)
         {
-            ModelSplit(partModels[i], _moveDirection[i]);
+            PartModelMove(partModels[i], _moveDirection[i]);
         }
-
         Debug.Log("模型组合");
     }
     
-    private void ModelSplit(GameObject partModel, Vector3 moveDir)
+    private void PartModelMove(GameObject partModel, Vector3 moveDir)
     {
         iTween.MoveAdd(partModel, iTween.Hash("amount", moveDir * moveDistance,
                                                 "time", 0.3f,

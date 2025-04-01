@@ -12,6 +12,8 @@ public class JigsawPiece : MonoBehaviour
     private JigsawInteraction jigsawInteraction;
     private PointableUnityEventWrapper handGrabEventWrapper;
     private Grabbable _grabbable;
+
+    public bool isJigsawFixed;
     
     //监听是否被抓取
     private void Awake()
@@ -36,4 +38,7 @@ public class JigsawPiece : MonoBehaviour
         jigsawInteraction.CancelHeilightPiece(gameObject);
         jigsawInteraction.IsJigsawUnselectedParts(gameObject);
     }
+    
+    //Todo：判断当前组件是否已经组合，如何已经组合，则不会跟随手势控制
+    //todo：hover当前构件，构件outline提示，并在panel面板中展示构件信息
 }

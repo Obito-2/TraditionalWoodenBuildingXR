@@ -475,7 +475,7 @@ GameObject:
   - component: {fileID: 3440882206913019244}
   - component: {fileID: 4137648560619006021}
   m_Layer: 5
-  m_Name: text
+  m_Name: ModelInfo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -530,7 +530,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: model and component informations display field.
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 36ddc81a4d6148c41aae3da27e544e9e, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -594,7 +594,7 @@ MonoBehaviour:
   m_margin: {x: -5.607502, y: 0, z: -6.7290115, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &3917354642043034253
@@ -744,7 +744,7 @@ GameObject:
   - component: {fileID: 3133775160414880586}
   m_Layer: 5
   m_Name: InteractPanel
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -17,7 +17,7 @@ public class ModelInteraction : MonoBehaviour
     private Vector3[] _moveDirection;//移动方向
     
     public Transform canvasTransform;
-
+    
     private void Awake()
     {
         _target = new GameObject("ModelCenter")
@@ -53,11 +53,12 @@ public class ModelInteraction : MonoBehaviour
     }
     private void Start()
     {
-        ShowUI();
-    }
-    private void ShowUI()
-    {
-        UI3DManager.Instance.ShowPanelOnSpecificCanvas<InteractPanel>(nameof(InteractPanel), canvasTransform);
+        UI3DManager.Instance.ShowPanelOnSpecificCanvas<InteractPanel>(nameof(InteractPanel), canvasTransform, (interactPanel) =>
+        {
+            EventCenter.Instance.TriggerEvent(EventName.InteractPanelLoadFinish,interactPanel);
+            
+        });
+
     }
     public void ExplodeModel()
     {

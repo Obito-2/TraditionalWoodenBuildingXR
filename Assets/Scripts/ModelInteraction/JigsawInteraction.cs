@@ -36,6 +36,9 @@ public class JigsawInteraction : MonoBehaviour
     public Dictionary<GameObject, GameObject> partsMappedGhostPartsDic = new Dictionary<GameObject, GameObject>();
     private MaterialChoice materialChoice;
 
+    public AudioTrigger JigsawSuccrssAudio;
+    public AudioTrigger JigsawFailAudio;
+
 
     //提供组合整体模型与虚影模型展示逻辑、组合判定、自动吸附组合动画、错误组合提示
     private void Awake()
@@ -64,7 +67,7 @@ public class JigsawInteraction : MonoBehaviour
     {
         foreach (GameObject part in partModels)
         {
-            //TODO：模型分散方式优化
+            //TODO：模型分散方式优化，二维平面排序问题，采用贪心算法+碰撞检测可以实现
             //将当前模型构件分散至球形平面上
             Vector3 randomDirection = Random.onUnitSphere;
             Vector3 scatterPosition = transform.position + randomDirection * scatterRadius;
@@ -100,6 +103,7 @@ public class JigsawInteraction : MonoBehaviour
             Debug.LogWarning("获取part对应ghostPiece字典成功");
         });
     }
+    //todo：组合逻辑bug，组合成功定位不准且同时触发组合失败
     public void IsJigsawUnselectedParts(GameObject partModel)
     {
         GameObject mappedGhostPiece = partsMappedGhostPartsDic[partModel];
@@ -108,10 +112,11 @@ public class JigsawInteraction : MonoBehaviour
 
         if (IsCUrrentUnselectedCombinate)
         {
+            Debug.LogWarning($"当前ghost的position是：{mappedGhostPiece.transform.position}");
             // 执行自动吸附组合逻辑，将当前partModel缓动到mappedGhostPiece的位置，并设置相同的rotation
             partModel.transform.DOMove(mappedGhostPiece.transform.position, 0.3f) // 移动到目标位置
                 .SetEase(Ease.InOutSine) // 设置缓动类型
-                .SetRelative(false); // 确保是绝对位置，而非相对位置
+                .SetRelative(false); // 确保是绝对位置
 
             partModel.transform.DORotate(mappedGhostPiece.transform.rotation.eulerAngles, 0.3f) // 旋转到目标旋转
                 .SetEase(Ease.InOutSine)
@@ -119,24 +124,14 @@ public class JigsawInteraction : MonoBehaviour
             //关闭ghost模型渲染
             MeshRenderer meshRenderer = mappedGhostPiece.GetComponent<MeshRenderer>();
             meshRenderer.enabled = false;
-            //Todo：播放模型组合音效
+            JigsawSuccrssAudio.PlayAudio();
+            Debug.LogWarning($"组合成功,当前模型位置：{partModel.transform.position}");
         }
-        //Todo：组合失败对应的交互提示动画以及音效
-        //取消失败后复原位置的的逻辑
-        // else
-        // {
-        //     // 执行自动归位逻辑，将当前partModel缓动，恢复到初始字典记录的位置和旋转
-        //     partModelsTransformData initialTransform = initialDataDic[partModel];
-        //
-        //     partModel.transform.DOMove(initialTransform.Position, 0.2f) // 恢复到初始位置
-        //         .SetEase(Ease.InOutSine) // 设置缓动类型
-        //         .SetRelative(false); // 确保是绝对位置
-        //
-        //     partModel.transform.DORotate(initialTransform.Rotation.eulerAngles, 0.2f) // 恢复到初始旋转
-        //         .SetEase(Ease.InOutSine)
-        //         .SetRelative(false);// 确保旋转是绝对旋转
-        //     Debug.LogWarning("执行自动归位");
-        // }
+        //组合失败，当前构件进行shake
+        partModel.transform.DOShakePosition(0.5f, 1f, 10, 90, false, true)
+            .SetEase(Ease.InOutSine);
+        JigsawFailAudio.PlayAudio();
+        Debug.LogWarning("组合失败");
     }
 
     //selected构件模型时，展示构件虚影

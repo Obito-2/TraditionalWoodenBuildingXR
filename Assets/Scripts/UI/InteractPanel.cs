@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ namespace UI
         [SerializeField]
         private Button[] _buttonsList;
   
-        private Text Modelinfo;
+        private TextMeshProUGUI Modelinfo;
 
         // Start is called before the first frame update
         private void Start()
@@ -23,6 +24,9 @@ namespace UI
             {
                 Debug.LogError($"InteractPanel获取交互组件失败.");
             }
+
+            Modelinfo = transform.Find("ModelInfo").transform.GetComponent<TextMeshProUGUI>();
+            
             _buttonsList = transform.GetComponentsInChildren<Button>();
             foreach (var button in _buttonsList)
             {
@@ -56,6 +60,11 @@ namespace UI
         private void PanelAnchor()
         {
             Debug.LogWarning(" Interact Panel Anchor");
+        }
+
+        public void ShowModelInfo(GameObject model)
+        {
+            Modelinfo.text = model.name;
         }
     }
     

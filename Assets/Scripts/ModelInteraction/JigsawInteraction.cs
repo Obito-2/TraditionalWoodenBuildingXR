@@ -80,9 +80,9 @@ public class JigsawInteraction : MonoBehaviour
     }
     private void CreatGhostVisuale(String modelName)
     {
-        modelName = MyTools.RemoveClone(this.gameObject.name) + "_Ghost";
-        //在特定位置加载ghost模型
-        ResourceManager.Instance.LoadAsync<GameObject>(modelName, (obj) =>
+        String LoadModelName = MyTools.RemoveClone(modelName) + "_Ghost";
+        //在特定位置加载ghost模型,并建立映射字典
+        ResourceManager.Instance.LoadAsync<GameObject>(LoadModelName, (obj) =>
         {
             obj.transform.position = this.transform.position;
             obj.transform.rotation = this.transform.rotation;
@@ -95,7 +95,7 @@ public class JigsawInteraction : MonoBehaviour
             for (int i = 0; i < _partGhostModels.Length; i++)
             {
                 _partGhostModels[i] = modelVisuals.transform.GetChild(i).gameObject;
-                if (_partGhostModels != null)
+                if (_partGhostModels[i] != null)
                 {
                     partsMappedGhostPartsDic[_partModels[i]] = _partGhostModels[i];
                 }
@@ -107,31 +107,37 @@ public class JigsawInteraction : MonoBehaviour
     public void IsJigsawUnselectedParts(GameObject partModel)
     {
         GameObject mappedGhostPiece = partsMappedGhostPartsDic[partModel];
-        float distanceMagnitude = (mappedGhostPiece.transform.position - partModel.transform.position).magnitude;
-        bool IsCUrrentUnselectedCombinate = distanceMagnitude <= JigsawMinDistance;
-
-        if (IsCUrrentUnselectedCombinate)
+        if (mappedGhostPiece != null)
         {
-            Debug.LogWarning($"当前ghost的position是：{mappedGhostPiece.transform.position}");
-            // 执行自动吸附组合逻辑，将当前partModel缓动到mappedGhostPiece的位置，并设置相同的rotation
-            partModel.transform.DOMove(mappedGhostPiece.transform.position, 0.3f) // 移动到目标位置
-                .SetEase(Ease.InOutSine) // 设置缓动类型
-                .SetRelative(false); // 确保是绝对位置
+            float distanceMagnitude = (mappedGhostPiece.transform.position - partModel.transform.position).magnitude;
+            bool IsCUrrentUnselectedCombinate = distanceMagnitude <= JigsawMinDistance;
+            if (IsCUrrentUnselectedCombinate)
+            {
+                Debug.LogWarning($"{mappedGhostPiece.name}ghost的position是：{mappedGhostPiece.transform.position}");
+                // 执行自动吸附组合逻辑，将当前partModel缓动到mappedGhostPiece的位置，并设置相同的rotation
+                partModel.transform.DOMove(mappedGhostPiece.transform.position, 0.3f) // 移动到目标位置
+                    .SetEase(Ease.InOutSine) // 设置缓动类型
+                    .SetRelative(false); // 确保是绝对位置
 
-            partModel.transform.DORotate(mappedGhostPiece.transform.rotation.eulerAngles, 0.3f) // 旋转到目标旋转
-                .SetEase(Ease.InOutSine)
-                .SetRelative(false); // 确保旋转是绝对旋转
-            //关闭ghost模型渲染
-            MeshRenderer meshRenderer = mappedGhostPiece.GetComponent<MeshRenderer>();
-            meshRenderer.enabled = false;
-            JigsawSuccrssAudio.PlayAudio();
-            Debug.LogWarning($"组合成功,当前模型位置：{partModel.transform.position}");
+                partModel.transform.DORotate(mappedGhostPiece.transform.rotation.eulerAngles, 0.3f) // 旋转到目标旋转
+                    .SetEase(Ease.InOutSine)
+                    .SetRelative(false); // 确保旋转是绝对旋转
+                //关闭ghost模型渲染
+                MeshRenderer meshRenderer = mappedGhostPiece.GetComponent<MeshRenderer>();
+                meshRenderer.enabled = false;
+                JigsawSuccrssAudio.PlayAudio();
+                Debug.LogWarning($"组合成功,当前模型位置：{partModel.transform.position}");
+            }
+            //组合失败，当前构件进行shake
+            partModel.transform.DOShakePosition(0.5f, 1f, 10, 90, false, true)
+                .SetEase(Ease.InOutSine);
+            JigsawFailAudio.PlayAudio();
+            Debug.LogWarning("组合失败");
         }
-        //组合失败，当前构件进行shake
-        partModel.transform.DOShakePosition(0.5f, 1f, 10, 90, false, true)
-            .SetEase(Ease.InOutSine);
-        JigsawFailAudio.PlayAudio();
-        Debug.LogWarning("组合失败");
+        else
+        {
+            Debug.LogError($"没能找到{partModel.name}对应的ghost模型");
+        }
     }
 
     //selected构件模型时，展示构件虚影

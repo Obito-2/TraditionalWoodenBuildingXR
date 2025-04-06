@@ -38,11 +38,14 @@ public class JigsawInteraction : MonoBehaviour
 
     public AudioTrigger JigsawSuccrssAudio;
     public AudioTrigger JigsawFailAudio;
-
+    
+    private GameObject JigsawCanvas;
+    private float padding = 0.2f;
 
     //提供组合整体模型与虚影模型展示逻辑、组合判定、自动吸附组合动画、错误组合提示
     private void Awake()
     {
+        JigsawCanvas = transform.Find("JigsawCanvas").gameObject;
         materialChoice = GetComponent<MaterialChoice>();
         if (materialChoice == null)
         {
@@ -59,24 +62,14 @@ public class JigsawInteraction : MonoBehaviour
 
     public void JigsawInitial()
     {
-        JigsawScatter(_partModels);
+        JigsawScatter(JigsawCanvas,_partModels);
         CreatGhostVisuale(this.gameObject.name);
     }
-
-    private void JigsawScatter(GameObject[] partModels)
+    //TODO：模型分散展示方法，背包系统，将模型picec缩放至统一大小展示于面板上
+    private void JigsawScatter(GameObject scatterCanvas,GameObject[] partModels)
     {
-        foreach (GameObject part in partModels)
-        {
-            //TODO：模型分散方式优化，二维平面排序问题，采用贪心算法+碰撞检测可以实现
-            //将当前模型构件分散至球形平面上
-            Vector3 randomDirection = Random.onUnitSphere;
-            Vector3 scatterPosition = transform.position + randomDirection * scatterRadius;
-            part.transform.position = scatterPosition;
-            part.transform.rotation = Random.rotation;
+        //切换场景
 
-            //记录分散后的构件的position与rotation
-            // initialDataDic[part] = new partModelsTransformData(part.transform.position, part.transform.rotation);
-        }
     }
     private void CreatGhostVisuale(String modelName)
     {
@@ -103,7 +96,6 @@ public class JigsawInteraction : MonoBehaviour
             Debug.LogWarning("获取part对应ghostPiece字典成功");
         });
     }
-    //todo：组合逻辑bug，组合成功定位不准且同时触发组合失败
     public void IsJigsawUnselectedParts(GameObject partModel)
     {
         GameObject mappedGhostPiece = partsMappedGhostPartsDic[partModel];
@@ -113,26 +105,23 @@ public class JigsawInteraction : MonoBehaviour
             bool IsCUrrentUnselectedCombinate = distanceMagnitude <= JigsawMinDistance;
             if (IsCUrrentUnselectedCombinate)
             {
-                Debug.LogWarning($"{mappedGhostPiece.name}ghost的position是：{mappedGhostPiece.transform.position}");
-                // 执行自动吸附组合逻辑，将当前partModel缓动到mappedGhostPiece的位置，并设置相同的rotation
-                partModel.transform.DOMove(mappedGhostPiece.transform.position, 0.3f) // 移动到目标位置
-                    .SetEase(Ease.InOutSine) // 设置缓动类型
-                    .SetRelative(false); // 确保是绝对位置
-
-                partModel.transform.DORotate(mappedGhostPiece.transform.rotation.eulerAngles, 0.3f) // 旋转到目标旋转
-                    .SetEase(Ease.InOutSine)
-                    .SetRelative(false); // 确保旋转是绝对旋转
+                //Todo：使用Dotween缓动会存在对不齐问题
+                partModel.transform.position = mappedGhostPiece.transform.position;
+                partModel.transform.rotation = mappedGhostPiece.transform.rotation;
                 //关闭ghost模型渲染
                 MeshRenderer meshRenderer = mappedGhostPiece.GetComponent<MeshRenderer>();
                 meshRenderer.enabled = false;
                 JigsawSuccrssAudio.PlayAudio();
-                Debug.LogWarning($"组合成功,当前模型位置：{partModel.transform.position}");
+                Debug.LogWarning($"组合成功,当前模型位置");
             }
-            //组合失败，当前构件进行shake
-            partModel.transform.DOShakePosition(0.5f, 1f, 10, 90, false, true)
-                .SetEase(Ease.InOutSine);
-            JigsawFailAudio.PlayAudio();
-            Debug.LogWarning("组合失败");
+            else
+            {
+                //组合失败，当前构件进行shake,
+                partModel.transform.DOShakePosition(0.5f, 1f, 10, 90, false, true)
+                    .SetEase(Ease.InOutSine);
+                JigsawFailAudio.PlayAudio();
+                Debug.LogWarning("组合失败");
+            }
         }
         else
         {

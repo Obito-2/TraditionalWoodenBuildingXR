@@ -35,7 +35,7 @@ public class JigsawPiece : MonoBehaviour
         EventCenter.Instance.AddListener<InteractPanel>(EventName.InteractPanelLoadFinish,GetInteractPanel);
     }
     
-    //Todo：判断当前组件是否已经组合，如何已经组合，则不会跟随手势控制
+    //Todo：判断当前组件是否已经组合，如果已经组合，则不会跟随手势控制
     private void GetInteractPanel(InteractPanel panel)
     {
         _interactPanel = panel;
@@ -54,10 +54,11 @@ public class JigsawPiece : MonoBehaviour
         _interactPanel.ShowModelInfo(this.gameObject);
         
     }
-
+    
     private void WhenUnselectPiece(PointerEvent pointerEvent)
     {
         jigsawInteraction.CancelHeilightPiece(gameObject);
+        //TODO：在指定范围unselected，才会进行组合判定
         jigsawInteraction.IsJigsawUnselectedParts(gameObject);
         _outline.enabled = false;
 

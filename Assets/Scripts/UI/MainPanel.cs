@@ -24,13 +24,14 @@ public class MainPanel : BaseFadePanel
 
     private void Start()
     {
+        //todo:自动点击，测试代码，需要删除
         Button FirstButton;
         FirstButton = _modelButtonList[0];
-        StartCoroutine(MyTools.DelayClickButton(FirstButton));
+        // StartCoroutine(MyTools.DelayClickButton(FirstButton));
     }
     
     private void onButtonClicked(Button button)
     {
-        Main.Instance.LoadModel(button);
+        Main.Instance.LoadModel(button.name);
     }
 }

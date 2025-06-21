@@ -1,21 +1,25 @@
 using System;
+using System.Collections;
 using System.Threading;
 using UnityEngine;
 using CodeArchitect.Manager.Event;
 using Oculus.Interaction.HandGrab;
 using UI;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// main使用单例模式，提供方法用于控制面板切换、加载模型、重新生成模型
+/// main使用单例模式，挂载在Main空物体上，用于显示主面板
+/// 对外提供方法用于控制面板切换、加载模型、重新生成模型
+///点击jigsaw进行切换场景
 /// </summary>
 public class Main : MonoBehaviour
 {
     //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质
     public GameObject _mainCanvas;
     private static Main _instance;//私有静态变量，属于类本身而不属于某个实例
-    public static Main Instance//公共静态属性，封装金泰字段的访问
+    public static Main Instance//公共静态属性，封装静态字段的访问
     {
         get
         {
@@ -29,6 +33,8 @@ public class Main : MonoBehaviour
                 GameObject obj = new GameObject("Main");
                 _instance = obj.AddComponent<Main>();
             }
+            // 确保物体在场景切换时不被销毁
+            DontDestroyOnLoad(_instance.gameObject);
             return _instance;
         }
     }
@@ -37,9 +43,9 @@ public class Main : MonoBehaviour
         //显示菜单panel
         UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
     }
-    public void LoadModel(Button button)
+    public void LoadModel(String modelName)
     {
-            ResourceManager.Instance.LoadAsync<GameObject>(button.name,(obj) =>
+            ResourceManager.Instance.LoadAsync<GameObject>(modelName,(obj) =>
             {
                 obj.transform.position = new Vector3(0,0,1);
                 EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
@@ -70,6 +76,18 @@ public class Main : MonoBehaviour
         {
             Debug.LogError($"没有找到模型{modelName}");
         }
+    }
+
+    public void LoadSceneAsync(string sceneName)
+    {
+        StartCoroutine(LoadSceneCoroutine(sceneName));
+    }
+
+    private IEnumerator LoadSceneCoroutine(string sceneName)
+    {
+        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
+        yield return asyncOperation;
+        Debug.LogWarning("Jigsaw Scene loaded successfully.");
     }
     
     //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质

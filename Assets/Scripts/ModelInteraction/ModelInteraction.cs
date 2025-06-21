@@ -1,25 +1,24 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using CodeArchitect.Manager.Event;
 using UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
+/// <summary>
+/// 该脚本挂载在模型物体身上
+/// 当用户调用 ExplodeModel 或 CombinationModel 方法时，
+/// 模型的子物体会按指定的方向移动，从而实现模型的"炸开"和"组合"效果。
+/// </summary>
 public class ModelInteraction : MonoBehaviour
 {
     [SerializeField]
-    private GameObject[] partModels;//模型子物体
-
+    private GameObject[] partModels;//存储模型子物体
     public float moveDistance = 0.2f;
     private GameObject _target;//移动方向
-    private Vector3[] _moveDirection;//移动方向
+    private Vector3[] _moveDirection;//子物体移动方向
     
     public Transform canvasTransform;
     
     private void Awake()
     {
+        //创建一个新的空物体，用于作为模型的中心
         _target = new GameObject("ModelCenter")
         {
             transform =
@@ -28,21 +27,22 @@ public class ModelInteraction : MonoBehaviour
             }
         };
         _target.transform.SetParent(this.transform);
-
+        //查找名为 "dougong_test" 的子物体，假设它包含了所有需要操作的子物体
         GameObject modelVisuals = this.transform.Find("dougong_test").gameObject;
-
         if (modelVisuals != null)
         {
+            //初始化子物体数组和移动方向数组
             partModels = new GameObject[modelVisuals.transform.childCount];
             _moveDirection = new Vector3[modelVisuals.transform.childCount];
         }
         else { Debug.LogWarning("获取整体visualModel失败"); }
-        //遍历子物体得到每个物体的 移动方向 与 初始位置
+        //遍历子物体通过和目标物体作向量减法，得到每个物体的 移动方向 与 初始位置
         for (int i = 0; i < modelVisuals.transform.childCount; i++)
         {
             partModels[i] = modelVisuals.transform.GetChild(i).gameObject;
             if (partModels[i] != null)
             {
+                // 计算每个子物体的移动方向，方向从子物体到目标物体
                 _moveDirection[i] = (_target.transform.position - partModels[i].transform.position).normalized;
             }
             else
@@ -53,31 +53,30 @@ public class ModelInteraction : MonoBehaviour
     }
     private void Start()
     {
-        UI3DManager.Instance.ShowPanelOnSpecificCanvas<InteractPanel>(nameof(InteractPanel), canvasTransform, (interactPanel) =>
-        {
-            EventCenter.Instance.TriggerEvent(EventName.InteractPanelLoadFinish,interactPanel);
-            
-        });
-
+        //在指定的UI画布上显示交互面板
+        UI3DManager.Instance.ShowPanelOnSpecificCanvas<InteractPanel>(nameof(InteractPanel), canvasTransform);
     }
+    //爆炸模型的方法，触发所有子物体的移动
     public void ExplodeModel()
     {
         for (int i = 0; i < partModels.Length; i++)
         {
+            //调用PartModelMove方法，向外移动子物体
             PartModelMove(partModels[i], -_moveDirection[i]);
         }
         Debug.Log("模型炸开");
     }
+    // 组合模型的方法，恢复所有子物体到原始位置
     public void CombinationModel()
     {
-
         for (int i = 0; i < partModels.Length; i++)
         {
+            // 调用 PartModelMove 方法，向内移动子物体
             PartModelMove(partModels[i], _moveDirection[i]);
         }
         Debug.Log("模型组合");
     }
-    
+    // 通过iTween插件实现子物体的平滑移动
     private void PartModelMove(GameObject partModel, Vector3 moveDir)
     {
         iTween.MoveAdd(partModel, iTween.Hash("amount", moveDir * moveDistance,

@@ -5,7 +5,10 @@ using CodeArchitect.Manager.Event;
 using Oculus.Interaction;
 using Oculus.Interaction.PoseDetection;
 using UnityEngine;
-
+/// <summary>
+/// 脚本挂载在hanpose空物体上
+/// 监听左右手手势，触发模型炸开或组合操作
+/// </summary>
 public class HandPoseInteraction : MonoBehaviour
 {
     private  ModelInteraction modelInteraction;
@@ -14,9 +17,10 @@ public class HandPoseInteraction : MonoBehaviour
     private Action ModelInteractionAction;
     private void Awake()
     {
+        // 左右手特定手势被识别时，触发爆炸模型操作
         PoseLeft.WhenSelected.AddListener(OnPoseLeftSelected);
         PoseRight.WhenSelected.AddListener(OnPoseRightSelected);
-        
+        // 监听模型加载完成事件，等待初始化模型完成后获取 ModelInteraction脚本
         EventCenter.Instance.AddListener<String>(EventName.ModelLoadFinish,(modelName) =>
         {
             AddModelInteractionAction(modelName);

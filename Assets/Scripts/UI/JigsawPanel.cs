@@ -1,6 +1,7 @@
 using System;
 using CodeArchitect.Manager.Event;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 /// <summary>
@@ -17,6 +18,10 @@ public class JigsawPanel : BaseFadePanel
     [SerializeField]
     private Toggle[] toggles;
     private UIMenuDelayFollowHead canvasFollowHead;
+    private Transform backCanvasTransform;
+    
+    [SerializeField] private Sprite onSprite;     // Toggle 打开时的图片
+    [SerializeField] private Sprite offSprite;    // Toggle 关闭时的图片
 
     // Start is called before the first frame update
     protected override void Awake()
@@ -41,7 +46,13 @@ public class JigsawPanel : BaseFadePanel
     private void Start()
     {
         _interactableManager = transform.root.GetComponent<InteractableManager>();
-        canvasFollowHead = transform.GetComponentInParent<UIMenuDelayFollowHead>();
+        backCanvasTransform = transform.root.Find("BackCanvas");
+        if (backCanvasTransform == null)
+        {
+            Debug.LogError("backCanvasTransform can't be found");
+        }
+        canvasFollowHead = backCanvasTransform.GetComponent<UIMenuDelayFollowHead>();
+        
     }
 
     private void ButtonOnClick(Button button)
@@ -63,7 +74,7 @@ public class JigsawPanel : BaseFadePanel
 
         switch (toggleName)
         {
-            case "Anchor":
+            case "Anchor"://模型整体是否可以抓取
                 if (_interactableManager == null)
                 {
                     Debug.LogError("Interactable manager is null");
@@ -71,11 +82,13 @@ public class JigsawPanel : BaseFadePanel
                 _interactableManager.IsModelAnchor(value);
                 break;
             
-            case "PanelAnchor":
+            //TODO: 关闭跟随同时不跟随父物体转动？跟随是否可以上下跟随？
+            case "PanelAnchor"://构件面板是否跟随头部运动
                 if (canvasFollowHead == null)
                 {
                     Debug.LogError("canvasFollowHead is null");
                 }
+                Debug.Log("背板跟随 / 关闭跟随");
                 canvasFollowHead.enabled = !value;
                 break;
         }

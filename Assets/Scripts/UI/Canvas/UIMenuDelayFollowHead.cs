@@ -30,10 +30,11 @@ public class UIMenuDelayFollowHead : MonoBehaviour
     public void Follow()
     {
         Vector3 camForward = Camera.main.transform.forward + Camera.main.transform.position;
-        camForward.y = Camera.main.transform.position.y;
+        //camForward.y = Camera.main.transform.position.y;//强制将 camForward 的 Y 值设置为摄像机当前位置的 Y 值。
         Vector3 camForwardOffset = new Vector3(camForward.x + offsetX, camForward.y + offsetY, camForward.z);
         Vector3 direction = (camForwardOffset - Camera.main.transform.position).normalized;
         Vector3 targetPosition = Camera.main.transform.position + direction * distance;
+        //让 UI 菜单逐帧缓慢移动到目标位置，而不是瞬移
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * movementSpeed);
 
         Vector3 playerPosition = new Vector3(playerHead.position.x, transform.position.y, playerHead.position.z);

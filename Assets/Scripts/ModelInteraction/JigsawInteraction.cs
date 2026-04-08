@@ -19,6 +19,7 @@ public class JigsawInteraction : MonoBehaviour
 {
 
     public RectTransform canvasTransform;
+    public RectTransform backCanvasTransform;
     public float scatterRadius = 1f; // 拼图块分散的半径
     public float JigsawMinDistance = 1f;
 
@@ -41,7 +42,7 @@ public class JigsawInteraction : MonoBehaviour
             Debug.LogError("materialChoice获取失败");
         }
         GameObject modelVisuals = this.transform.Find("dougong_test").gameObject;
-        modelVisuals.transform.SetParent(canvasTransform);
+        modelVisuals.transform.SetParent(backCanvasTransform);
         //获取当前整体模型的所有构件
         _partModels = new GameObject[modelVisuals.transform.childCount];
         for (int i = 0; i < _partModels.Length; i++)
@@ -92,7 +93,6 @@ public class JigsawInteraction : MonoBehaviour
             bool IsCUrrentUnselectedCombinate = distanceMagnitude <= JigsawMinDistance;
             if (IsCUrrentUnselectedCombinate)
             {
-                //Todo：使用Dotween缓动会存在对不齐问题
                 partModel.transform.position = mappedGhostPiece.transform.position;
                 partModel.transform.rotation = mappedGhostPiece.transform.rotation;
                 //关闭ghost模型渲染

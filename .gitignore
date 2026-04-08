@@ -73,3 +73,17 @@ InitTestScene*.unity*
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
 
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# --- Assets 白名单：仅跟踪 Scripts / Prefabs / Scenes（含子路径内所有 .meta）---
+# 其余 Models、Textures、Audio、Resources、XR、Settings 等需自备；克隆后引用可能 Missing。
+# 若需跟踪根目录个别文件（如 URP Global、StreamingAssets），可在此追加 !/ 规则。
+/[Aa]ssets/*
+!/[Aa]ssets/Scripts/
+!/[Aa]ssets/Scripts/**
+!/[Aa]ssets/Prefabs/
+!/[Aa]ssets/Prefabs/**
+!/[Aa]ssets/Scenes/
+!/[Aa]ssets/Scenes/**
+!/[Aa]ssets/Scripts.meta
+!/[Aa]ssets/Prefabs.meta
+!/[Aa]ssets/Scenes.meta

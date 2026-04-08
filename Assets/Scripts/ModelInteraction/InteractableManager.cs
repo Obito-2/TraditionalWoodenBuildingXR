@@ -72,7 +72,6 @@ public class InteractableManager : MonoBehaviour
     /// 当某个拼图组件完成拼接时，禁用该部分的交互组件（避免重复操作）
     /// </summary>
     /// <param name="pieceJigsawed"></param>
-    //Todo：判断当前组件是否已经组合，如果已经组合，则不会跟随手势控制
     private void AnchorPieceJigsawed(GameObject pieceJigsawed)
     {
         OffPieceInteractables<HandGrabInteractable>(pieceJigsawed);

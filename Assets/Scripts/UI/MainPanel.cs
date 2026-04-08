@@ -21,15 +21,14 @@ public class MainPanel : BaseFadePanel
             button.onClick.AddListener(() => { onButtonClicked(button); }); //使用lambda表达式监听外部作用域函数
         }
     }
-
     private void Start()
     {
-        //todo:自动点击，测试代码，需要删除
-        Button FirstButton;
-        FirstButton = _modelButtonList[0];
+        // //todo:自动点击，测试代码，需要删除
+        // Button FirstButton;
+        // FirstButton = _modelButtonList[0];
         // StartCoroutine(MyTools.DelayClickButton(FirstButton));
+        // Debug.LogError("自动测试：点击主面板第一个按钮");
     }
-    
     private void onButtonClicked(Button button)
     {
         Main.Instance.LoadModel(button.name);

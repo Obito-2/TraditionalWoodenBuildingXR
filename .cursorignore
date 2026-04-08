@@ -1,0 +1,6 @@
+﻿# 减轻 Cursor 索引；以下路径对 AI 不可见，按需增删
+Library/
+Logs/
+Temp/
+obj/
+

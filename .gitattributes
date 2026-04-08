@@ -1,0 +1,9 @@
+* text=auto
+*.cs text diff
+*.shader text diff
+*.cginc text diff
+*.compute text diff
+*.unity text diff
+*.prefab text diff
+*.asset text diff
+*.meta text diff

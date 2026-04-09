@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// 管理WorldSpace模式（3D空间中）的UI管理器
+/// 锟斤拷锟斤拷WorldSpace模式锟斤拷3D锟秸硷拷锟叫ｏ拷锟斤拷UI锟斤拷锟斤拷锟斤拷
 /// </summary>
 public class UI3DManager : PanelManager
 {

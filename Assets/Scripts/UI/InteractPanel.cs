@@ -88,7 +88,7 @@ namespace UI
                     break;
                 
                 case "Jigsaw":
-                    Main.Instance.LoadSceneAsync("DouGongJigsaw");
+                    Main.Instance.LoadSceneAsync(ExperienceSession.JigsawSceneName);
                     break;
                 case "AIChat":
                     //首先加载dialogue

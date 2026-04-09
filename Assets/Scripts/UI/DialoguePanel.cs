@@ -33,7 +33,7 @@ public class DialoguePanel : BaseFadePanel
 
     private void UpdateUserQueryText(String interactPanelModelInfo)
     {
-        queryContent.text ="请介绍下八铺作补间铺作构件中的：" + interactPanelModelInfo;
+        queryContent.text = ExperienceSession.GetLlmUserQuestionPrefix() + interactPanelModelInfo;
         Debug.LogWarning("对话面板query更新成功");
     }
 

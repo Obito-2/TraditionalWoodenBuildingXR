@@ -44,21 +44,39 @@ public abstract class PanelManager
     /// </summary>
     public virtual void InitCanvas()
     {
+        // 移除已销毁的 Canvas 引用，否则 ContainsKey 仍为 true 但访问 .transform 会 MissingReferenceException
+        var keys = new List<string>(canvasDic.Keys);
+        for (int k = 0; k < keys.Count; k++)
+        {
+            if (canvasDic[keys[k]] == null)
+                canvasDic.Remove(keys[k]);
+        }
+
         canvasArr = GameObject.FindGameObjectsWithTag(canvasTag);
         if (canvasArr != null)
         {
             for (int i = 0; i < canvasArr.Length; i++)
             {
-                if (!canvasDic.ContainsKey(canvasArr[i].name))
-                {
-                    canvasDic.Add(canvasArr[i].name, canvasArr[i]);
+                canvasDic[canvasArr[i].name] = canvasArr[i];
 #if UNITY_EDITOR
-                    Debug.Log(canvasArr[i].name);
+                Debug.Log(canvasArr[i].name);
 #endif
-                }
-
             }
         }
+    }
+
+    /// <summary>
+    /// 获取有效的 Canvas；若字典里是已销毁引用则先 InitCanvas 再查。
+    /// </summary>
+    protected bool TryGetCanvas(string canvasName, out GameObject canvas)
+    {
+        if (canvasDic.TryGetValue(canvasName, out canvas) && canvas != null)
+            return true;
+        InitCanvas();
+        if (canvasDic.TryGetValue(canvasName, out canvas) && canvas != null)
+            return true;
+        canvas = null;
+        return false;
     }
     public void ClearCanvas()
     {
@@ -108,9 +126,9 @@ public abstract class PanelManager
     public virtual void ShowPanel<T>(string panelName, string canvasName, Action<T> onFinish = null, Action<T> onBegin = null, bool needSavePanel = false, ResourceLoadWay resourceLoadWay = ResourceLoadWay.Addressables) where T : BasePanel
     {
 
-        if (!canvasDic.ContainsKey(canvasName))
+        if (!TryGetCanvas(canvasName, out _))
         {
-            Debug.LogWarning($"传入的canvas:{canvasName}名字错误,panel:{panelName}");
+            Debug.LogWarning($"传入的canvas:{canvasName}名字错误或未找到,panel:{panelName}");
             return;
         }
         IsOperating = true;
@@ -141,9 +159,16 @@ public abstract class PanelManager
         ResourceManager.Instance.LoadAsync<GameObject>(panelPath,
             (obj) =>
             {
+                if (!TryGetCanvas(canvasName, out GameObject canvasGo))
+                {
+                    Debug.LogError($"ShowPanel: Canvas「{canvasName}」无效或已被销毁，无法挂载「{panelName}」。已丢弃本次加载实例。");
+                    UnityEngine.Object.Destroy(obj);
+                    IsOperating = false;
+                    return;
+                }
                 obj.name = panelName;
                 //把UI设为对应Canvas的子物体
-                obj.transform.SetParent(canvasDic[canvasName].transform, false);
+                obj.transform.SetParent(canvasGo.transform, false);
                 T panel = obj.GetComponent<T>();
                 panelDic.Add(panelName, panel);
                 panel.Show(() =>

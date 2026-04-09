@@ -33,8 +33,9 @@ public class LLMChat : MonoBehaviour
 
     private void SendQueryToLLM(String interactPanelModelInfo)
     {
-        //启动协程方法发送请求，协程完成后将请求状态、结果数据发送给dialouguePanel做展示
-        StartCoroutine(PostRequest("请介绍下八铺作补间铺作构件中的：" + interactPanelModelInfo, (response) =>
+        string prefix = ExperienceSession.GetLlmUserQuestionPrefix();
+        string userMessage = prefix + interactPanelModelInfo;
+        StartCoroutine(PostRequest(userMessage, (response) =>
         {
             EventCenter.Instance.TriggerEvent(EventName.LLMResponse, response);
 
@@ -66,10 +67,14 @@ public class LLMChat : MonoBehaviour
             yield break;
         }
 
+        string systemContent = systemPrompt.prompt;
+        if (ExperienceSession.TryGetLlmSystemPromptOverride(out string overridePrompt))
+            systemContent = overridePrompt;
+
         List<Message> messages = new List<Message>
         {
-            new Message { role = "system", content = systemPrompt.prompt },//系统角色设定
-            new Message { role = "user",content = message}//用户输入
+            new Message { role = "system", content = systemContent },
+            new Message { role = "user",content = message}
         };
         //组装请求体
         ChatRequest requestBody = new ChatRequest

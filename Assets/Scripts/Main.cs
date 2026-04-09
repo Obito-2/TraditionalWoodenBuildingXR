@@ -16,6 +16,11 @@ using UnityEngine.UI;
 /// </summary>
 public class Main : MonoBehaviour
 {
+    [SerializeField] private ExperienceModelCatalog modelCatalog;
+
+    /// <summary>供 MainPanel 等与 Inspector 中同一份目录引用。</summary>
+    public ExperienceModelCatalog ModelCatalog => modelCatalog;
+
     //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质
     public GameObject _mainCanvas;
     private static Main _instance;//私有静态变量，属于类本身而不属于某个实例
@@ -38,6 +43,12 @@ public class Main : MonoBehaviour
             return _instance;
         }
     }
+    void Awake()
+    {
+        if (modelCatalog == null)
+            modelCatalog = Resources.Load<ExperienceModelCatalog>("ExperienceModelCatalog");
+    }
+
     void Start()
     {
         //显示菜单panel
@@ -45,16 +56,32 @@ public class Main : MonoBehaviour
     }
     public void LoadModel(String modelName)
     {
-            ResourceManager.Instance.LoadAsync<GameObject>(modelName,(obj) =>
+        ExperienceModelEntry entry = ResolveEntry(modelName);
+        ExperienceSession.BeginExperience(entry, modelName);
+
+        ResourceManager.Instance.LoadAsync<GameObject>(modelName,(obj) =>
             {
-                obj.transform.position = new Vector3(0,0,1);
+                obj.transform.position = entry.spawnPosition;
                 EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
                 UI3DManager.Instance.HidePanel("MainPanel", () =>
                 {
-                    _mainCanvas.SetActive(false);
+                    if (_mainCanvas != null)
+                        _mainCanvas.SetActive(false);
                 });
                 Debug.LogWarning($"{obj.name}与 交互面板 模型显示成功");
             });
+    }
+
+    ExperienceModelEntry ResolveEntry(string addressableKey)
+    {
+        if (modelCatalog != null)
+        {
+            var e = modelCatalog.GetEntryOrDefault(addressableKey);
+            if (e != null)
+                return e;
+        }
+
+        return ExperienceModelEntry.CreateFallback(addressableKey);
     }
     public void RespawnModel(string modelName)
     {
@@ -63,10 +90,12 @@ public class Main : MonoBehaviour
         {
             Destroy(abandonedModel);
             modelName = MyTools.RemoveClone(modelName);
+            var entry = ResolveEntry(modelName);
+            ExperienceSession.BeginExperience(entry, modelName);
             ResourceManager.Instance.LoadAsync<GameObject>(modelName,
                 (obj) =>
                 {
-                    obj.transform.position = new Vector3(0, 0, 1);
+                    obj.transform.position = entry.spawnPosition;
                     EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
                 });
 
@@ -78,16 +107,17 @@ public class Main : MonoBehaviour
         }
     }
 
-    public void LoadSceneAsync(string sceneName)
+    public void LoadSceneAsync(string sceneName, Action onComplete = null)
     {
-        StartCoroutine(LoadSceneCoroutine(sceneName));
+        StartCoroutine(LoadSceneCoroutine(sceneName, onComplete));
     }
 
-    private IEnumerator LoadSceneCoroutine(string sceneName)
+    private IEnumerator LoadSceneCoroutine(string sceneName, Action onComplete)
     {
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
         yield return asyncOperation;
-        Debug.LogWarning("Jigsaw Scene loaded successfully.");
+        Debug.LogWarning($"Scene loaded: {sceneName}");
+        onComplete?.Invoke();
     }
     
     //控制拼图相关参数，如自动吸附距离、吸附动画时长、虚影材质

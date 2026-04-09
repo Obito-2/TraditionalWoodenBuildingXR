@@ -69,8 +69,20 @@ public static class LlmEnv
         return "";
     }
 
-    /// <summary>完整 POST URL，与 .env 中一致，不做路径拼接。</summary>
-    public static string ApiUrl => Get(ApiUrlName).Trim();
+    /// <summary>完整 POST URL（OpenAI 兼容一般为 …/v1/chat/completions）。若以 …/v1 结尾会自动补全路径。</summary>
+    public static string ApiUrl => NormalizeChatCompletionsUrl(Get(ApiUrlName).Trim());
+
+    static string NormalizeChatCompletionsUrl(string u)
+    {
+        if (string.IsNullOrEmpty(u))
+            return u;
+        if (u.IndexOf("chat/completions", StringComparison.OrdinalIgnoreCase) >= 0)
+            return u;
+        string t = u.TrimEnd('/');
+        if (t.EndsWith("/v1", StringComparison.OrdinalIgnoreCase))
+            return t + "/chat/completions";
+        return u;
+    }
 
     public static string ApiKey => Get(ApiKeyName).Trim();
 

@@ -60,12 +60,14 @@ public class JigsawPanel : BaseFadePanel
         switch (button.name)
         {
             case "Reset":
-                Main.Instance.LoadSceneAsync("DouGongJigsaw");
+                Main.Instance.LoadSceneAsync(ExperienceSession.JigsawSceneName);
                 break;
             
             case"Return":
-                Main.Instance.LoadSceneAsync("DouGong");
-                Main.Instance.LoadModel("DouGong");
+                Main.Instance.LoadSceneAsync(ExperienceSession.HubSceneName, () =>
+                {
+                    Main.Instance.LoadModel(ExperienceSession.LastAddressableKey);
+                });
                 break;
         } 
     }

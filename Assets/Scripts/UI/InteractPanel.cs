@@ -86,6 +86,14 @@ namespace UI
                 case "Reset":
                     Main.Instance.RespawnModel(this.transform.root.gameObject.name);
                     break;
+
+                case "Return":
+                    Main.Instance.LoadSceneAsync(ExperienceSession.HubSceneName, () =>
+                    {
+                        UI3DManager.Instance.InitCanvas();
+                        UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
+                    });
+                    break;
                 
                 case "AIChat":
                     //首先加载dialogue

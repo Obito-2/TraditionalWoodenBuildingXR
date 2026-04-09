@@ -17,14 +17,18 @@ public class PieceModel : MonoBehaviour
     private PointableUnityEventWrapper handGrabEventWrapper;
     private Grabbable _grabbable;
     
-    public BoxCollider JigsawAreaCollider;
+    public Collider JigsawAreaCollider;
     private Outline _outline;
     
     private DistanceHandGrabInteractable _distanceHandGrabInteractable;
     
     private void Awake()
     {
-        JigsawAreaCollider = this.transform.root.GetComponent<BoxCollider>();
+        Transform root = this.transform.root;
+        Collider area = root.GetComponent<BoxCollider>();
+        if (area == null) area = root.GetComponent<MeshCollider>();
+        if (area == null) area = root.GetComponent<Collider>();
+        JigsawAreaCollider = area;
         _outline = GetComponent<Outline>();
         _distanceHandGrabInteractable = this.GetComponent<DistanceHandGrabInteractable>();
         if (SceneManager.GetActiveScene().name == "DouGongJigsaw")
@@ -70,18 +74,9 @@ public class PieceModel : MonoBehaviour
         _outline.enabled = false;
 
     }
-    // 判断两个Collider是否相交，
-    private bool IsColliderIntersecting(Collider pieceCollider, BoxCollider areaCollider)
+    private bool IsColliderIntersecting(Collider pieceCollider, Collider areaCollider)
     {
-        if (pieceCollider is BoxCollider boxCollider)
-        {
-            return boxCollider.bounds.Intersects(areaCollider.bounds);
-        }
-        
-        if (pieceCollider is MeshCollider meshCollider)
-        {
-            return meshCollider.bounds.Intersects(areaCollider.bounds);
-        }
-        return false;
+        if (pieceCollider == null || areaCollider == null) return false;
+        return pieceCollider.bounds.Intersects(areaCollider.bounds);
     }
 }

@@ -10,16 +10,16 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// mainÊ¹ÓÃµ¥ÀıÄ£Ê½£¬¹ÒÔØÔÚMain¿ÕÎïÌåÉÏ£¬ÓÃÓÚÏÔÊ¾Ö÷Ãæ°å
-/// ¶ÔÍâÌá¹©·½·¨ÓÃÓÚ¿ØÖÆÃæ°åÇĞ»»¡¢¼ÓÔØÄ£ĞÍ¡¢ÖØĞÂÉú³ÉÄ£ĞÍ
-///µã»÷jigsaw½øĞĞÇĞ»»³¡¾°
+/// mainä½¿ç”¨å•ä¾‹æ¨¡å¼ï¼ŒæŒ‚è½½åœ¨Mainç©ºç‰©ä½“ä¸Šï¼Œç”¨äºæ˜¾ç¤ºä¸»é¢æ¿
+/// å¯¹å¤–æä¾›æ–¹æ³•ç”¨äºæ§åˆ¶é¢æ¿åˆ‡æ¢ã€åŠ è½½æ¨¡å‹ã€é‡æ–°ç”Ÿæˆæ¨¡å‹
+///ç‚¹å‡»jigsawè¿›è¡Œåˆ‡æ¢åœºæ™¯
 /// </summary>
 public class Main : MonoBehaviour
 {
-    //¿ØÖÆÆ´Í¼Ïà¹Ø²ÎÊı£¬Èç×Ô¶¯Îü¸½¾àÀë¡¢Îü¸½¶¯»­Ê±³¤¡¢ĞéÓ°²ÄÖÊ
+    //æ§åˆ¶æ‹¼å›¾ç›¸å…³å‚æ•°ï¼Œå¦‚è‡ªåŠ¨å¸é™„è·ç¦»ã€å¸é™„åŠ¨ç”»æ—¶é•¿ã€è™šå½±æè´¨
     public GameObject _mainCanvas;
-    private static Main _instance;//Ë½ÓĞ¾²Ì¬±äÁ¿£¬ÊôÓÚÀà±¾Éí¶ø²»ÊôÓÚÄ³¸öÊµÀı
-    public static Main Instance//¹«¹²¾²Ì¬ÊôĞÔ£¬·â×°¾²Ì¬×Ö¶ÎµÄ·ÃÎÊ
+    private static Main _instance;//ç§æœ‰é™æ€å˜é‡ï¼Œå±äºç±»æœ¬èº«è€Œä¸å±äºæŸä¸ªå®ä¾‹
+    public static Main Instance//å…¬å…±é™æ€å±æ€§ï¼Œå°è£…é™æ€å­—æ®µçš„è®¿é—®
     {
         get
         {
@@ -33,14 +33,14 @@ public class Main : MonoBehaviour
                 GameObject obj = new GameObject("Main");
                 _instance = obj.AddComponent<Main>();
             }
-            // È·±£ÎïÌåÔÚ³¡¾°ÇĞ»»Ê±²»±»Ïú»Ù
+            // ç¡®ä¿ç‰©ä½“åœ¨åœºæ™¯åˆ‡æ¢æ—¶ä¸è¢«é”€æ¯
             DontDestroyOnLoad(_instance.gameObject);
             return _instance;
         }
     }
     void Start()
     {
-        //ÏÔÊ¾²Ëµ¥panel
+        //æ˜¾ç¤ºèœå•panel
         UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
     }
     public void LoadModel(String modelName)
@@ -53,7 +53,7 @@ public class Main : MonoBehaviour
                 {
                     _mainCanvas.SetActive(false);
                 });
-                Debug.LogWarning($"{obj.name}Óë ½»»¥Ãæ°å Ä£ĞÍÏÔÊ¾³É¹¦");
+                Debug.LogWarning($"{obj.name}ä¸ äº¤äº’é¢æ¿ æ¨¡å‹æ˜¾ç¤ºæˆåŠŸ");
             });
     }
     public void RespawnModel(string modelName)
@@ -70,11 +70,11 @@ public class Main : MonoBehaviour
                     EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
                 });
 
-            Debug.LogWarning("Ä£ĞÍÖØĞÂ³É¹¦³É¹¦");
+            Debug.LogWarning("æ¨¡å‹é‡æ–°æˆåŠŸæˆåŠŸ");
         }
         else
         {
-            Debug.LogError($"Ã»ÓĞÕÒµ½Ä£ĞÍ{modelName}");
+            Debug.LogError($"æ²¡æœ‰æ‰¾åˆ°æ¨¡å‹{modelName}");
         }
     }
 
@@ -90,7 +90,7 @@ public class Main : MonoBehaviour
         Debug.LogWarning("Jigsaw Scene loaded successfully.");
     }
     
-    //¿ØÖÆÆ´Í¼Ïà¹Ø²ÎÊı£¬Èç×Ô¶¯Îü¸½¾àÀë¡¢Îü¸½¶¯»­Ê±³¤¡¢ĞéÓ°²ÄÖÊ
+    //æ§åˆ¶æ‹¼å›¾ç›¸å…³å‚æ•°ï¼Œå¦‚è‡ªåŠ¨å¸é™„è·ç¦»ã€å¸é™„åŠ¨ç”»æ—¶é•¿ã€è™šå½±æè´¨
     void OnDestroy()
     {
         if (_instance == this)

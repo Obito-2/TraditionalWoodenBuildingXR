@@ -2,24 +2,31 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using CodeArchitect.Manager.Event;
-using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 
 public class LLMChat : MonoBehaviour
 {
-    //请求AK URL
-    private string apiKey = "sk-c5e2dbdbf1e04d0c9fc98b2420935a3e";
-    private string apiUrl = "https://api.deepseek.com/chat/completions";
-    //请求模型名称
-    [SerializeField] private string modelName = "deepseek-chat";
+    private string apiKey;
+    private string apiUrl;
+    private string modelName;
     //系统提示词
     [SerializeField]
     public SystemPrompt systemPrompt;
 
     private void Awake()
     {
+        apiKey = LlmEnv.ApiKey;
+        apiUrl = LlmEnv.ApiUrl;
+        modelName = LlmEnv.Model;
+        if (string.IsNullOrEmpty(apiKey))
+            Debug.LogError("未在 .env 中配置 LLM_API_KEY，无法调用 LLM。");
+        if (string.IsNullOrEmpty(apiUrl))
+            Debug.LogError("未在 .env 中配置 LLM_API_URL，无法调用 LLM。");
+        if (string.IsNullOrEmpty(modelName))
+            Debug.LogError("未在 .env 中配置 LLM_MODEL，无法调用 LLM。");
+
         //订阅aichat按钮点击事件，获取query，触发发送请求协程
         EventCenter.Instance.AddListener<String>(EventName.AIChat,SendQueryToLLM);
     }
@@ -43,6 +50,22 @@ public class LLMChat : MonoBehaviour
     
     IEnumerator PostRequest(string message, UnityAction<string> callback)
     {
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            callback?.Invoke("出错了: 未在 .env 中配置 LLM_API_KEY");
+            yield break;
+        }
+        if (string.IsNullOrEmpty(apiUrl))
+        {
+            callback?.Invoke("出错了: 未在 .env 中配置 LLM_API_URL");
+            yield break;
+        }
+        if (string.IsNullOrEmpty(modelName))
+        {
+            callback?.Invoke("出错了: 未在 .env 中配置 LLM_MODEL");
+            yield break;
+        }
+
         List<Message> messages = new List<Message>
         {
             new Message { role = "system", content = systemPrompt.prompt },//系统角色设定

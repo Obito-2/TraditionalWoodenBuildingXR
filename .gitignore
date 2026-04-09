@@ -1,4 +1,5 @@
 # Unity — https://github.com/github/gitignore/blob/main/Unity.gitignore
+.env
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/

@@ -29,22 +29,29 @@ public class Main : MonoBehaviour
         get
         {
             if (_instance == null)
-            {
                 _instance = FindObjectOfType<Main>();
-            }
-
             if (_instance == null)
             {
                 GameObject obj = new GameObject("Main");
                 _instance = obj.AddComponent<Main>();
             }
-            // 确保物体在场景切换时不被销毁
-            DontDestroyOnLoad(_instance.gameObject);
             return _instance;
         }
     }
     void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        _instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        // Quest XR 标准设置：关闭 vSync（由 XR 运行时接管帧同步），锁定目标帧率
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 72;
+
         if (modelCatalog == null)
             modelCatalog = Resources.Load<ExperienceModelCatalog>("ExperienceModelCatalog");
     }

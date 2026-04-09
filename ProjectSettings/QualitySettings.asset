@@ -105,7 +105,10 @@ QualitySettings:
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
-    excludedTargetPlatforms: []
+    excludedTargetPlatforms:
+    - Standalone
+    - Android
+    - Server
   - serializedVersion: 3
     name: High Fidelity
     pixelLightCount: 1
@@ -155,7 +158,10 @@ QualitySettings:
     terrainBillboardStart: 50
     terrainFadeLength: 5
     terrainMaxTrees: 50
-    excludedTargetPlatforms: []
+    excludedTargetPlatforms:
+    - Standalone
+    - Android
+    - Server
   m_TextureMipmapLimitGroupNames: []
   m_PerPlatformDefaultQuality:
     Android: 1
@@ -166,9 +172,9 @@ QualitySettings:
     Nintendo Switch: 2
     PS4: 2
     PS5: 2
-    Server: 0
+    Server: 1
     Stadia: 2
-    Standalone: 2
+    Standalone: 1
     WebGL: 1
     Windows Store Apps: 2
     XboxOne: 2

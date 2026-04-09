@@ -13,11 +13,19 @@ public class ModelInteraction : MonoBehaviour
     public float moveDistance = 0.2f;
     private GameObject _target;//移动方向
     private Vector3[] _moveDirection;//子物体移动方向
-    
+
+    [Tooltip("包含所有零件的直接父节点名；为空则优先读取 ExperienceSession.ActiveEntry.partsRootName，最终回退为 dougong_test")]
+    [SerializeField] private string partsRootName = "dougong_test";
+
     public Transform canvasTransform;
-    
+
     private void Awake()
     {
+        // 优先使用 ExperienceSession 中的配置，允许运行时按模型覆盖
+        var activeEntry = ExperienceSession.ActiveEntry;
+        if (activeEntry != null && !string.IsNullOrEmpty(activeEntry.partsRootName))
+            partsRootName = activeEntry.partsRootName;
+
         //创建一个新的空物体，用于作为模型的中心
         _target = new GameObject("ModelCenter")
         {
@@ -27,15 +35,15 @@ public class ModelInteraction : MonoBehaviour
             }
         };
         _target.transform.SetParent(this.transform);
-        //查找名为 "dougong_test" 的子物体，假设它包含了所有需要操作的子物体
-        GameObject modelVisuals = this.transform.Find("dougong_test").gameObject;
+        //查找零件父节点子物体
+        GameObject modelVisuals = this.transform.Find(partsRootName)?.gameObject;
         if (modelVisuals != null)
         {
             //初始化子物体数组和移动方向数组
             partModels = new GameObject[modelVisuals.transform.childCount];
             _moveDirection = new Vector3[modelVisuals.transform.childCount];
         }
-        else { Debug.LogWarning("获取整体visualModel失败"); }
+        else { Debug.LogWarning($"获取整体visualModel失败，partsRootName={partsRootName}"); return; }
         //遍历子物体通过和目标物体作向量减法，得到每个物体的 移动方向 与 初始位置
         for (int i = 0; i < modelVisuals.transform.childCount; i++)
         {

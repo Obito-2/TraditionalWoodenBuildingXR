@@ -1,0 +1,29 @@
+## 项目概述
+
+古建筑 **透视环境（Quest 3）** 模型交互与知识问答应用。主要功能：手势/交互控制模型缩放与移动、拆解与组合、虚拟拼装、AI 问答等。个人小项目：**不追求复杂架构与性能优化**，但实现上仍应遵守 **Unity 生命周期、主线程与 XR 的常规用法**（避免明显反模式）。
+
+## 技术栈
+
+| 项 | 说明 |
+|----|------|
+| 引擎 | Unity **2022.3.55f1**（LTS） |
+| 渲染 | **URP**（`Assets/Settings` 下有 `URP-*.asset`） |
+| XR / Meta | 见下方 **已锁定包版本**（查官方文档时请对齐这些版本） |
+| 资源 | **Addressables**（`AddressableAssetsData` + `EditorBuildSettings` 已挂 Addressables） |
+| 构建场景 | `DouGong.unity`、`DouGongJigsaw.unity`（见 `ProjectSettings/EditorBuildSettings.asset`） |
+| 目标设备 | **Meta Quest 3** |
+
+### 已锁定包版本（`Packages/manifest.json`，升级后请同步更新本段）
+
+- `com.meta.xr.mrutilitykit` **72.0.0**
+- `com.meta.xr.sdk.interaction.ovr` **72.0.0**
+- `com.unity.xr.oculus` **4.2.0**
+- `com.unity.xr.management` **4.5.0**
+- `com.unity.addressables` **1.22.3**
+- `com.unity.render-pipelines.universal` **14.0.11**
+
+## 协作约束
+
+1. **尽量少用第三方包**，优先自研或可维护的小封装，路径在Assets\Scripts\CodeArchitect下；确需引入时说明理由与替代方案。
+2. **依赖 Meta / Quest 官方能力时**，按 **上表版本** 查阅对应官方文档与 API（勿混用其他大版本文档中的过时示例），或者让用户提供url链接。
+3. **交付脚本时**说明：挂到哪个 GameObject、Inspector 必填项、典型使用流程与注意事项（挂点、场景依赖等）。

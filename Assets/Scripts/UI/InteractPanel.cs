@@ -87,9 +87,6 @@ namespace UI
                     Main.Instance.RespawnModel(this.transform.root.gameObject.name);
                     break;
                 
-                case "Jigsaw":
-                    Main.Instance.LoadSceneAsync(ExperienceSession.JigsawSceneName);
-                    break;
                 case "AIChat":
                     //首先加载dialogue
                     UI3DManager.Instance.ShowPanelOnSpecificCanvas<DialoguePanel>(nameof(DialoguePanel), this.transform.parent, (panel) =>

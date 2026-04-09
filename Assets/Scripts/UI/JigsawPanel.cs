@@ -63,10 +63,11 @@ public class JigsawPanel : BaseFadePanel
                 Main.Instance.LoadSceneAsync(ExperienceSession.JigsawSceneName);
                 break;
             
-            case"Return":
+            case "Return":
                 Main.Instance.LoadSceneAsync(ExperienceSession.HubSceneName, () =>
                 {
-                    Main.Instance.LoadModel(ExperienceSession.LastAddressableKey);
+                    UI3DManager.Instance.InitCanvas();
+                    UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
                 });
                 break;
         } 

@@ -175,6 +175,11 @@ PrefabInstance:
       propertyPath: m_BackGroundColor.r
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2483171112402191008, guid: f54012181eacade4ea242c65f804720f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 2483171112407822886, guid: f54012181eacade4ea242c65f804720f,
         type: 3}
       propertyPath: _trackingOriginType
@@ -947,7 +952,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _position: {x: 0, y: 0, z: 0}
-  _size: {x: 200, y: 120, z: 0.01}
+  _size: {x: 220, y: 130, z: 0.01}
 --- !u!114 &696396824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1134,7 +1139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _position: {x: 0, y: 0, z: 0}
-  _size: {x: 200, y: 120, z: 0.01}
+  _size: {x: 220, y: 130, z: 0.01}
 --- !u!114 &1013675781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1716,7 +1721,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.05, y: -0.417}
-  m_SizeDelta: {x: 200, y: 120}
+  m_SizeDelta: {x: 220, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1702771109
 MonoBehaviour:

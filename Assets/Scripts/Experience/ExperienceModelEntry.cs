@@ -21,6 +21,9 @@ public class ExperienceModelEntry
     [Tooltip("进入拼图模式时加载的场景名")]
     public string jigsawSceneName = "DouGongJigsaw";
 
+    [Tooltip("ModelInteraction 查找零件父节点的子物体名；为空则由 ModelInteraction.partsRootName 决定")]
+    public string partsRootName = "";
+
     [TextArea(1, 3)]
     [Tooltip("拼到用户问题前的固定前缀，例如「请介绍下…构件中的：」")]
     public string llmUserQuestionPrefix = "请介绍下八铺作补间铺作构件中的：";

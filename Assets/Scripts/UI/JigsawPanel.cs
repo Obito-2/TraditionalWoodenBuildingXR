@@ -1,7 +1,6 @@
 using System;
 using CodeArchitect.Manager.Event;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 /// <summary>
@@ -64,11 +63,7 @@ public class JigsawPanel : BaseFadePanel
                 break;
             
             case "Return":
-                Main.Instance.LoadSceneAsync(ExperienceSession.HubSceneName, () =>
-                {
-                    UI3DManager.Instance.InitCanvas();
-                    UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
-                });
+                Main.Instance.LoadHubAndShowMainMenu();
                 break;
         } 
     }

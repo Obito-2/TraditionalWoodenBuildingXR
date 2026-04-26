@@ -30,6 +30,7 @@ public class PieceModel : MonoBehaviour
         if (area == null) area = root.GetComponent<Collider>();
         JigsawAreaCollider = area;
         _outline = GetComponent<Outline>();
+        // DistanceHandGrabInteractable 是可选的，若零件不支持远距离抓取则为 null
         _distanceHandGrabInteractable = this.GetComponent<DistanceHandGrabInteractable>();
         if (SceneManager.GetActiveScene().name == "DouGongJigsaw")
         {
@@ -37,12 +38,18 @@ public class PieceModel : MonoBehaviour
         }
         _grabbable = this.GetComponent<Grabbable>();
         handGrabEventWrapper = this.GetComponent<PointableUnityEventWrapper>();
-        
-        handGrabEventWrapper.InjectPointable(_grabbable);
-        _distanceHandGrabInteractable.InjectOptionalPointableElement(_grabbable);
-        
-        handGrabEventWrapper.WhenSelect.AddListener(WhenSelectPiece);
-        handGrabEventWrapper.WhenUnselect.AddListener(WhenUnselectPiece);
+
+        if (handGrabEventWrapper != null && _grabbable != null)
+        {
+            handGrabEventWrapper.InjectPointable(_grabbable);
+            handGrabEventWrapper.WhenSelect.AddListener(WhenSelectPiece);
+            handGrabEventWrapper.WhenUnselect.AddListener(WhenUnselectPiece);
+        }
+
+        if (_distanceHandGrabInteractable != null && _grabbable != null)
+        {
+            _distanceHandGrabInteractable.InjectOptionalPointableElement(_grabbable);
+        }
     }
     /// <summary>
     /// 被抓取时触发：高亮、虚影材质提示、展示当前构件的信息

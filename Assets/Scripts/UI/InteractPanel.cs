@@ -1,10 +1,7 @@
 using System;
 using CodeArchitect.Manager.Event;
 using TMPro;
-using Unity.VisualScripting;
-// using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace UI
@@ -54,14 +51,6 @@ namespace UI
         {
             _modelInteraction = this.transform.root.GetComponent<ModelInteraction>();
             _interactableManager = this.transform.root.GetComponent<InteractableManager>();
-            
-            // //todo:自动点击，测试代码，需要删除
-            // Button AIChatButton = transform.Find("AIChat").GetComponent<Button>();
-            // if (SceneManager.GetActiveScene().name == "DouGong")
-            // {
-            //     StartCoroutine(MyTools.DelayClickButton(AIChatButton));
-            //     Debug.LogError("自动测试：点击AICHAT按钮");
-            // }
         }
         private void ButtonOnClick(Button button)
         {
@@ -88,11 +77,7 @@ namespace UI
                     break;
 
                 case "Return":
-                    Main.Instance.LoadSceneAsync(ExperienceSession.HubSceneName, () =>
-                    {
-                        UI3DManager.Instance.InitCanvas();
-                        UI3DManager.Instance.ShowPanel<MainPanel>(nameof(MainPanel), CanvasName.MainCanvas);
-                    });
+                    Main.Instance.LoadHubAndShowMainMenu();
                     break;
                 
                 case "AIChat":

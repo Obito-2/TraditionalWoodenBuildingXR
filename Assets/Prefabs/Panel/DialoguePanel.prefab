@@ -378,8 +378,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -778734266794397235, guid: 4881ef6d2242d7946b3f93cc94737a27,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: cb21639e852278045862051de26d3f73, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -423,8 +422,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 21.889004, y: 5.297329}
-  m_SizeDelta: {x: 15.8348, y: 12.19}
+  m_AnchoredPosition: {x: -6.5, y: 5.297329}
+  m_SizeDelta: {x: 15, y: 15}
   m_Pivot: {x: 3.4562736, y: 0.70758224}
 --- !u!222 &8835730522169048690
 CanvasRenderer:
@@ -454,8 +453,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1776694385334742840, guid: 4881ef6d2242d7946b3f93cc94737a27,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: a25b76af9d283ac439ca6b1cffe82681, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -531,7 +529,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "AI\u95EE\u7B54"
+  m_text: "\u300A\u8425\u9020\u6CD5\u5F0F\u300B\u77E5\u8BC6\u95EE\u7B54"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7370a3193c71fc5479dc2a8a8073f122, type: 2}
   m_sharedMaterial: {fileID: 3705421474916601233, guid: 7370a3193c71fc5479dc2a8a8073f122,

@@ -85,8 +85,7 @@ public class MainPanel : BaseFadePanel
             entry = ExperienceModelEntry.CreateFallback("DouGong");
 
         string key = entry.addressableKey;
-        string jigsawScene = entry.jigsawSceneName;
         ExperienceSession.BeginExperience(entry, key);
-        Main.Instance.LoadSceneAsync(jigsawScene);
+        Main.Instance.LoadSceneAsync(ExperienceSession.JigsawSceneName);
     }
 }

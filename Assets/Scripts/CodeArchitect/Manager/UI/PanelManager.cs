@@ -58,9 +58,6 @@ public abstract class PanelManager
             for (int i = 0; i < canvasArr.Length; i++)
             {
                 canvasDic[canvasArr[i].name] = canvasArr[i];
-#if UNITY_EDITOR
-                Debug.Log(canvasArr[i].name);
-#endif
             }
         }
     }
@@ -128,7 +125,6 @@ public abstract class PanelManager
 
         if (!TryGetCanvas(canvasName, out _))
         {
-            Debug.LogWarning($"传入的canvas:{canvasName}名字错误或未找到,panel:{panelName}");
             return;
         }
         IsOperating = true;
@@ -161,7 +157,6 @@ public abstract class PanelManager
             {
                 if (!TryGetCanvas(canvasName, out GameObject canvasGo))
                 {
-                    Debug.LogError($"ShowPanel: Canvas「{canvasName}」无效或已被销毁，无法挂载「{panelName}」。已丢弃本次加载实例。");
                     UnityEngine.Object.Destroy(obj);
                     IsOperating = false;
                     return;

@@ -43,7 +43,7 @@ public class ModelInteraction : MonoBehaviour
             partModels = new GameObject[modelVisuals.transform.childCount];
             _moveDirection = new Vector3[modelVisuals.transform.childCount];
         }
-        else { Debug.LogWarning($"获取整体visualModel失败，partsRootName={partsRootName}"); return; }
+        else { return; }
         //遍历子物体通过和目标物体作向量减法，得到每个物体的 移动方向 与 初始位置
         for (int i = 0; i < modelVisuals.transform.childCount; i++)
         {
@@ -52,10 +52,6 @@ public class ModelInteraction : MonoBehaviour
             {
                 // 计算每个子物体的移动方向，方向从子物体到目标物体
                 _moveDirection[i] = (_target.transform.position - partModels[i].transform.position).normalized;
-            }
-            else
-            {
-                Debug.LogWarning($"获取子物体失败 name:{modelVisuals.transform.GetChild(i).gameObject.name}");
             }
         }
     }
@@ -72,7 +68,6 @@ public class ModelInteraction : MonoBehaviour
             //调用PartModelMove方法，向外移动子物体
             PartModelMove(partModels[i], -_moveDirection[i]);
         }
-        Debug.Log("模型炸开");
     }
     // 组合模型的方法，恢复所有子物体到原始位置
     public void CombinationModel()
@@ -82,7 +77,6 @@ public class ModelInteraction : MonoBehaviour
             // 调用 PartModelMove 方法，向内移动子物体
             PartModelMove(partModels[i], _moveDirection[i]);
         }
-        Debug.Log("模型组合");
     }
     // 通过iTween插件实现子物体的平滑移动
     private void PartModelMove(GameObject partModel, Vector3 moveDir)

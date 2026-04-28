@@ -32,6 +32,10 @@ public class ExperienceModelEntry
     [Tooltip("非空时覆盖 LLMChat 上 Inspector 中的系统提示词")]
     public string llmSystemPromptOverride = "";
 
+    [TextArea(2, 6)]
+    [Tooltip("模型的描述文本，加载面板时展示")]
+    public string modelDescription = "";
+
     public static ExperienceModelEntry CreateFallback(string addressableKey)
     {
         return new ExperienceModelEntry

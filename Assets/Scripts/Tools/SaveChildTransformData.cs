@@ -52,8 +52,6 @@ public class SaveChildTransformData : MonoBehaviour
 
         // 保存到文件
         File.WriteAllText(filePath, json);
-
-        Debug.Log("Child transforms saved to: " + filePath);
     }
 }
 

@@ -37,10 +37,6 @@ public class JigsawInteraction : MonoBehaviour
     private void Awake()
     {
         materialChoice = GetComponent<MaterialChoice>();
-        if (materialChoice == null)
-        {
-            Debug.LogError("materialChoice获取失败");
-        }
         GameObject modelVisuals = this.transform.Find("dougong_test").gameObject;
         modelVisuals.transform.SetParent(backCanvasTransform);
         //获取当前整体模型的所有构件
@@ -77,7 +73,6 @@ public class JigsawInteraction : MonoBehaviour
                     partsMappedGhostPartsDic[_partModels[i]] = _partGhostModels[i];
                 }
             }
-            Debug.LogWarning("获取part对应ghostPiece字典成功");
         });
     }
     /// <summary>
@@ -101,7 +96,6 @@ public class JigsawInteraction : MonoBehaviour
                 JigsawSuccrssAudio.PlayAudio();
                 EventCenter.Instance.TriggerEvent(EventName.PieceJigsawed, partModel);//组合成功触发事件，通知manager关闭当前物体的交互
                 partModel.transform.SetParent(transform);
-                Debug.LogWarning($"组合piece成功");
             }
             else
             {
@@ -110,12 +104,7 @@ public class JigsawInteraction : MonoBehaviour
                     .SetEase(Ease.InOutSine);
                 JigsawFailAudio.PlayAudio();
                 partModel.transform.SetParent(transform);
-                Debug.LogWarning("组合失败");
             }
-        }
-        else
-        {
-            Debug.LogError($"没能找到{partModel.name}对应的ghost模型");
         }
     }
     
@@ -127,7 +116,6 @@ public class JigsawInteraction : MonoBehaviour
         if (meshRenderer != null && mappedGhostPiece != null)
         {
             meshRenderer.material = materialChoice.materialElements[2].material;
-            Debug.LogWarning("修改材质成功");
         }
     }
     public void CancelHeilightPiece(GameObject partModel)
@@ -137,7 +125,6 @@ public class JigsawInteraction : MonoBehaviour
         if (meshRenderer != null && mappedGhostPiece != null)
         {
             meshRenderer.material = materialChoice.materialElements[0].material;
-            Debug.LogWarning("修改材质成功");
         }
     }
 }

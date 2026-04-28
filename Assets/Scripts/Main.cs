@@ -73,7 +73,6 @@ public class Main : MonoBehaviour
                     if (_mainCanvas != null)
                         _mainCanvas.SetActive(false);
                 });
-                Debug.LogWarning($"{obj.name}与 交互面板 模型显示成功");
             });
     }
 
@@ -103,12 +102,6 @@ public class Main : MonoBehaviour
                     obj.transform.position = entry.spawnPosition;
                     EventCenter.Instance.TriggerEvent(EventName.ModelLoadFinish,obj.name);
                 });
-
-            Debug.LogWarning("模型重新成功成功");
-        }
-        else
-        {
-            Debug.LogError($"没有找到模型{modelName}");
         }
     }
 
@@ -148,7 +141,6 @@ public class Main : MonoBehaviour
     {
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
         yield return asyncOperation;
-        Debug.LogWarning($"Scene loaded: {sceneName}");
         onComplete?.Invoke();
     }
 

@@ -52,7 +52,7 @@ public class JsonManager : SingletonBase<JsonManager>
                 //jsonStr = JsonMapper.ToJson(data);
                 break;
             case JsonType.NewtonsoftJson:
-                jsonStr = JsonConvert.SerializeObject(data); Debug.Log(jsonStr);
+                jsonStr = JsonConvert.SerializeObject(data);
                 break;
         }
         //�����л���Json�ַ��� �洢��ָ��·�����ļ���
@@ -137,7 +137,6 @@ public class JsonManager : SingletonBase<JsonManager>
         string path = Application.persistentDataPath + "/" + fileName + ".json";
         if (!File.Exists(path))
         {
-            Debug.Log($"�Ҳ���{path}����δ����");
             return;
         }
         File.Delete(path);

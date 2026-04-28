@@ -1,7 +1,7 @@
 namespace CodeArchitect.Manager.Event
 {
-    public enum EventName 
-    {   
+    public enum EventName
+    {
         ModelLoadFinish,
         RespawnModel,
         InteractPanelLoadFinish,
@@ -10,6 +10,7 @@ namespace CodeArchitect.Manager.Event
         PieceJigsawed,
         AIChat,
         LLMResponse,
-    
+        LLMImages,  // LLM 响应中的图片数据
+
     }
 }

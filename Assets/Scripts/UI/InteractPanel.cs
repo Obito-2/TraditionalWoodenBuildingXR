@@ -51,6 +51,18 @@ namespace UI
         {
             _modelInteraction = this.transform.root.GetComponent<ModelInteraction>();
             _interactableManager = this.transform.root.GetComponent<InteractableManager>();
+
+            // 从模型配置中加载模型描述信息
+            LoadModelDescription();
+        }
+
+        private void LoadModelDescription()
+        {
+            var entry = ExperienceSession.ActiveEntry;
+            if (entry != null && !string.IsNullOrEmpty(entry.modelDescription))
+            {
+                Modelinfo.text = entry.modelDescription;
+            }
         }
         private void ButtonOnClick(Button button)
         {
@@ -58,7 +70,7 @@ namespace UI
             {
                 case "Combination":
                     if (_modelInteraction == null)
-                    {Debug.LogError("找不到_modelInteraction");
+                    {
                         return;
                     }
                     _modelInteraction.CombinationModel();
@@ -66,7 +78,7 @@ namespace UI
                 
                 case "Explode":
                     if (_modelInteraction == null)
-                    {Debug.LogError("找不到_modelInteraction");
+                    {
                         return;
                     }
                     _modelInteraction.ExplodeModel();
@@ -96,7 +108,6 @@ namespace UI
         {
             if (_interactableManager == null)
             {
-                Debug.LogError("Interactable manager is null");
                 return;
             }
             _interactableManager.IsModelAnchor(value);

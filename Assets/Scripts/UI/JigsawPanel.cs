@@ -46,10 +46,6 @@ public class JigsawPanel : BaseFadePanel
     {
         _interactableManager = transform.root.GetComponent<InteractableManager>();
         backCanvasTransform = transform.root.Find("BackCanvas");
-        if (backCanvasTransform == null)
-        {
-            Debug.LogError("backCanvasTransform can't be found");
-        }
         canvasFollowHead = backCanvasTransform.GetComponent<UIMenuDelayFollowHead>();
         
     }
@@ -75,18 +71,15 @@ public class JigsawPanel : BaseFadePanel
             case "Anchor"://模型整体是否可以抓取
                 if (_interactableManager == null)
                 {
-                    Debug.LogError("Interactable manager is null");
                 }
                 _interactableManager.IsModelAnchor(value);
                 break;
-            
+
             //TODO: 关闭跟随同时不跟随父物体转动？跟随是否可以上下跟随？
             case "PanelAnchor"://构件面板是否跟随头部运动
                 if (canvasFollowHead == null)
                 {
-                    Debug.LogError("canvasFollowHead is null");
                 }
-                Debug.Log("背板跟随 / 关闭跟随");
                 canvasFollowHead.enabled = !value;
                 break;
         }

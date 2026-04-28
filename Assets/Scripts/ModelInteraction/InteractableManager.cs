@@ -37,10 +37,6 @@ public class InteractableManager : MonoBehaviour
         grabFreeTransformer = this.GetComponent<GrabFreeTransformer>();
         oneGrabRotateTransformer = this.GetComponent<OneGrabRotateTransformer>();
         
-        if (HolisticRayInteraction == null || HolisticHandInteraction == null)
-        {
-            Debug.LogError($"找不到整体模型interactable物体");
-        }
         boxColliderGizmo = GetComponent<BoxColliderGizmo>();
         
         EventCenter.Instance.AddListener<GameObject>(EventName.PieceJigsawed,AnchorPieceJigsawed);
@@ -57,13 +53,11 @@ public class InteractableManager : MonoBehaviour
             if (currentDistance > MinDistanceBetweenPlayers )
             {
                 HolisticRayInteraction.SetActive(true); // 启用整体模型的射线交互
-                Debug.LogWarning("Enabled HolisticRayInteraction");
                 boxColliderGizmo.enabled = true;
             }
             if (currentDistance < MinDistanceBetweenPlayers)
             {
                 HolisticRayInteraction.SetActive(false); // 禁用整体模型的射线交互
-                Debug.LogWarning("Disabled HolisticRayInteraction");
                 boxColliderGizmo.enabled = false;
             }
         }
@@ -93,7 +87,6 @@ public class InteractableManager : MonoBehaviour
         {
             interactableComponent.enabled = false;
         }
-        Debug.LogWarning($"{typeof(T).Name} component disabled on {pieceModel.name}");
     }
     /// <summary>
     /// 设置模型是否为“锚定”状态
@@ -102,15 +95,14 @@ public class InteractableManager : MonoBehaviour
     public void IsModelAnchor(bool isAnchor)
     {
         if (isAnchor)
-        { 
+        {
             //取消当前ghost整体模型的抓取、缩放、射线,开启旋转
             HolisticHandInteraction.SetActive(false);
             HolisticRayInteraction.SetActive(false);
             grabFreeTransformer.enabled = false;
             oneGrabRotateTransformer.enabled = true;
-            Debug.LogWarning("模型固定");
             _isHolistModelAnchor = true;
-            
+
         }else
         {
             //开启模型的抓取、射线
@@ -118,7 +110,6 @@ public class InteractableManager : MonoBehaviour
             HolisticRayInteraction.SetActive(false);
             grabFreeTransformer.enabled = true;
             oneGrabRotateTransformer.enabled = false;
-            Debug.LogWarning("模型解锁");
             _isHolistModelAnchor = false;
         }
     }

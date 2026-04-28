@@ -54,7 +54,6 @@ public static class LlmEnv
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"读取 .env 失败: {path}\n{e.Message}");
             }
 
             break;
@@ -87,4 +86,8 @@ public static class LlmEnv
     public static string ApiKey => Get(ApiKeyName).Trim();
 
     public static string Model => Get(ModelName).Trim();
+
+    /// <summary>RAG 智能体接口 URL，形如 http://192.168.x.x:8000/ar/chat</summary>
+    const string RagApiUrlName = "RAG_API_URL";
+    public static string RagApiUrl => Get(RagApiUrlName).Trim();
 }

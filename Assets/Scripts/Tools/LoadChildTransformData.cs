@@ -46,22 +46,8 @@ public class LoadChildTransformData : MonoBehaviour
                         child.rotation = data.rotation;
                         //child.name = data.name;
                     }
-
-                    Debug.Log("子物体的 transform 数据已成功加载并应用。");
-                }
-                else
-                {
-                    Debug.LogError("子物体数量与数据长度不匹配！");
                 }
             }
-            else
-            {
-                Debug.LogError("读取的 JSON 数据无效！");
-            }
-        }
-        else
-        {
-            Debug.LogError("指定的文件不存在：" + filePath);
         }
     }
 }

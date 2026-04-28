@@ -41,8 +41,6 @@ public class MainPanel : BaseFadePanel
         if (catalog != null && catalog.entries != null && catalog.entries.Count > 0)
         {
             int n = Mathf.Min(_modelButtonList.Length, catalog.entries.Count);
-            if (_modelButtonList.Length != catalog.entries.Count)
-                Debug.LogWarning($"[MainPanel] 按钮数量({_modelButtonList.Length})与目录条目数({catalog.entries.Count})不一致，仅绑定前 {n} 个。");
 
             for (int i = 0; i < n; i++)
             {

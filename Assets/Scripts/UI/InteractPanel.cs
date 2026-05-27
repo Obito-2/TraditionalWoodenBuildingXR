@@ -94,7 +94,7 @@ namespace UI
                 
                 case "AIChat":
                     //首先加载dialogue
-                    UI3DManager.Instance.ShowPanelOnSpecificCanvas<DialoguePanel>(nameof(DialoguePanel), this.transform.parent, (panel) =>
+                    UI3DManager.Instance.ShowPanelOnSpecificCanvas<DialoguePanel>(nameof(DialoguePanel), this.transform.root.Find("AICanvas"), (panel) =>
                     {
                         //触发事件，发送当前模型信息作为query
                         EventCenter.Instance.TriggerEvent(EventName.AIChat,Modelinfo.text);

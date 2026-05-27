@@ -4,14 +4,15 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// 从 .env 读取 LLM_API_URL、LLM_API_KEY、LLM_MODEL（仅文件，不回退进程环境变量）。
-/// 查找顺序：项目根目录 .env（与 Assets 同级）→ StreamingAssets/.env（便于随包携带）。
+/// 从 Resources/llm_config 或 .env 文件读取 LLM_API_URL、LLM_API_KEY、LLM_MODEL、RAG_API_URL。
+/// Resources.Load 是跨平台主路径（Editor + APK 均可用）；文件读取仅 Editor 兜底。
 /// </summary>
 public static class LlmEnv
 {
     const string ApiUrlName = "LLM_API_URL";
     const string ApiKeyName = "LLM_API_KEY";
     const string ModelName = "LLM_MODEL";
+    const string RagApiUrlName = "RAG_API_URL";
 
     static Dictionary<string, string> _fileVars;
     static bool _loaded;
@@ -23,6 +24,16 @@ public static class LlmEnv
         _loaded = true;
         _fileVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+        // 主路径：Resources/llm_config.txt（跨平台，APK 内也可用）
+        TextAsset configAsset = Resources.Load<TextAsset>("llm_config");
+        if (configAsset != null)
+        {
+            ParseDotEnvContent(configAsset.text);
+            Debug.Log("[LlmEnv] 已从 Resources/llm_config 加载配置");
+            return;
+        }
+
+        // 兜底：文件系统 .env（仅 Editor / 开发环境可用）
         string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         string[] candidates =
         {
@@ -36,27 +47,33 @@ public static class LlmEnv
                 continue;
             try
             {
-                foreach (string line in File.ReadAllLines(path))
-                {
-                    string t = line.Trim();
-                    if (t.Length == 0 || t[0] == '#')
-                        continue;
-                    int eq = t.IndexOf('=');
-                    if (eq <= 0)
-                        continue;
-                    string key = t.Substring(0, eq).Trim();
-                    string val = t.Substring(eq + 1).Trim();
-                    if (val.Length >= 2 &&
-                        ((val[0] == '"' && val[^1] == '"') || (val[0] == '\'' && val[^1] == '\'')))
-                        val = val.Substring(1, val.Length - 2);
-                    _fileVars[key] = val;
-                }
+                ParseDotEnvContent(File.ReadAllText(path));
+                Debug.Log($"[LlmEnv] 已从 {path} 加载配置");
             }
             catch (Exception e)
             {
+                Debug.LogWarning($"[LlmEnv] 读取 {path} 失败: {e.Message}");
             }
-
             break;
+        }
+    }
+
+    static void ParseDotEnvContent(string content)
+    {
+        foreach (string line in content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+        {
+            string t = line.Trim();
+            if (t.Length == 0 || t[0] == '#')
+                continue;
+            int eq = t.IndexOf('=');
+            if (eq <= 0)
+                continue;
+            string key = t.Substring(0, eq).Trim();
+            string val = t.Substring(eq + 1).Trim();
+            if (val.Length >= 2 &&
+                ((val[0] == '"' && val[^1] == '"') || (val[0] == '\'' && val[^1] == '\'')))
+                val = val.Substring(1, val.Length - 2);
+            _fileVars[key] = val;
         }
     }
 
@@ -80,14 +97,13 @@ public static class LlmEnv
         string t = u.TrimEnd('/');
         if (t.EndsWith("/v1", StringComparison.OrdinalIgnoreCase))
             return t + "/chat/completions";
-        return u;
+        // 裸域名/URL 自动补全 /v1/chat/completions
+        return t + "/v1/chat/completions";
     }
 
     public static string ApiKey => Get(ApiKeyName).Trim();
 
     public static string Model => Get(ModelName).Trim();
 
-    /// <summary>RAG 智能体接口 URL，形如 http://192.168.x.x:8000/ar/chat</summary>
-    const string RagApiUrlName = "RAG_API_URL";
     public static string RagApiUrl => Get(RagApiUrlName).Trim();
 }

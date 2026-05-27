@@ -10,7 +10,6 @@ namespace CodeArchitect.Manager.Event
         PieceJigsawed,
         AIChat,
         LLMResponse,
-        LLMImages,  // LLM 响应中的图片数据
 
     }
 }

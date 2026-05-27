@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using CodeArchitect.Manager.Event;
 using UnityEngine;
 using UnityEngine.Events;
@@ -8,6 +9,14 @@ using UnityEngine.Networking;
 
 public class LLMChat : MonoBehaviour
 {
+    private const float RAG_TIMEOUT = 10f;
+
+    /// <summary>绕过 SSL 证书验证（Quest 3/Android 需此设置才能访问外部 HTTPS API）</summary>
+    private class BypassCertificate : CertificateHandler
+    {
+        protected override bool ValidateCertificate(byte[] certificateData) => true;
+    }
+
     private string apiKey;
     private string apiUrl;
     private string modelName;
@@ -28,7 +37,7 @@ public class LLMChat : MonoBehaviour
         threadId = LoadOrCreateThreadId();
 
         //订阅aichat按钮点击事件，获取query，触发发送请求协程
-        EventCenter.Instance.AddListener<String>(EventName.AIChat,SendQueryToLLM);
+        EventCenter.Instance.AddListener<String>(EventName.AIChat, SendQueryToLLM);
     }
 
     /// <summary>
@@ -58,20 +67,67 @@ public class LLMChat : MonoBehaviour
         string prefix = ExperienceSession.GetLlmUserQuestionPrefix();
         string userMessage = prefix + interactPanelModelInfo;
 
-        // 优先使用 RAG 智能体接口，否则退回到 OpenAI 接口
-        if (!string.IsNullOrEmpty(LlmEnv.RagApiUrl))
+        bool hasRag = !string.IsNullOrEmpty(LlmEnv.RagApiUrl);
+        bool hasLlm = !string.IsNullOrEmpty(LlmEnv.ApiUrl) && !string.IsNullOrEmpty(LlmEnv.ApiKey);
+
+        if (hasRag)
         {
-            StartCoroutine(PostRagRequest(userMessage, (response) =>
+            StartCoroutine(TryRagWithFallback(userMessage, hasLlm));
+        }
+        else if (hasLlm)
+        {
+            StartCoroutine(PostRequest(userMessage, (response) =>
             {
                 EventCenter.Instance.TriggerEvent(EventName.LLMResponse, response);
             }));
         }
         else
         {
-            StartCoroutine(PostRequest(userMessage, (response) =>
+            EventCenter.Instance.TriggerEvent(EventName.LLMResponse, "出错了: 未配置任何 LLM 接口");
+        }
+    }
+
+    /// <summary>
+    /// RAG 优先，失败或超时自动兜底商业 LLM。
+    /// 各阶段通过 LLMResponse 事件更新 UI 状态提示。
+    /// </summary>
+    IEnumerator TryRagWithFallback(string userMessage, bool hasLlmFallback)
+    {
+        // 阶段1：正在请求 RAG
+        EventCenter.Instance.TriggerEvent(EventName.LLMResponse, "正在搜索知识库…");
+        Debug.Log("[LLMChat] 尝试 RAG 请求...");
+        string ragResult = null;
+        yield return PostRagRequest(userMessage, (response) =>
+        {
+            ragResult = response;
+        });
+
+        bool ragFailed = string.IsNullOrEmpty(ragResult) || ragResult.StartsWith("出错了:");
+        if (!ragFailed)
+        {
+            Debug.Log("[LLMChat] RAG 请求成功");
+            EventCenter.Instance.TriggerEvent(EventName.LLMResponse, ragResult);
+            yield break;
+        }
+
+        Debug.LogWarning($"[LLMChat] RAG 失败，兜底商业 LLM。RAG 结果: {ragResult ?? "null"}");
+
+        if (hasLlmFallback)
+        {
+            // 阶段2：RAG 失败，切换云端模型
+            EventCenter.Instance.TriggerEvent(EventName.LLMResponse, "RAG 服务失败，切换云端模型回答\n正在思考中…");
+            Debug.Log("[LLMChat] 开始兜底商业 LLM 请求...");
+            string llmResult = null;
+            yield return PostRequest(userMessage, (response) =>
             {
-                EventCenter.Instance.TriggerEvent(EventName.LLMResponse, response);
-            }));
+                llmResult = response;
+            });
+            // LLM 结果直接展示（成功或错误信息都让用户看到）
+            EventCenter.Instance.TriggerEvent(EventName.LLMResponse, llmResult);
+        }
+        else
+        {
+            EventCenter.Instance.TriggerEvent(EventName.LLMResponse, "出错了: RAG 服务不可用，且未配置商业 LLM 兜底");
         }
     }
 
@@ -126,6 +182,7 @@ public class LLMChat : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
         request.SetRequestHeader("Authorization", "Bearer " + apiKey);
+        request.certificateHandler = new BypassCertificate();
 
         yield return request.SendWebRequest();//暂停协程，等网络返回结果，再恢复执行。
 
@@ -150,7 +207,7 @@ public class LLMChat : MonoBehaviour
     }
 
     /// <summary>
-    /// RAG 智能体接口：处理 SSE 流式响应
+    /// RAG 智能体接口（带超时控制）
     /// </summary>
     IEnumerator PostRagRequest(string query, UnityAction<string> callback)
     {
@@ -174,6 +231,8 @@ public class LLMChat : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+        request.timeout = (int)RAG_TIMEOUT;
+        request.certificateHandler = new BypassCertificate();
 
         yield return request.SendWebRequest();
 
@@ -195,8 +254,7 @@ public class LLMChat : MonoBehaviour
             Debug.Log($"[LLMChat] RAG 响应预览:\n{preview}");
         }
 
-        List<ImageInfo> images = new List<ImageInfo>();
-        string answer = ProcessRagSSEResponse(sseResponse, images);
+        string answer = ProcessRagSSEResponse(sseResponse);
         if (string.IsNullOrEmpty(answer))
         {
             Debug.LogWarning("[LLMChat] RAG 返回空答案，原始响应:\n" + sseResponse);
@@ -205,11 +263,6 @@ public class LLMChat : MonoBehaviour
         else
         {
             callback?.Invoke(answer);
-            // 发送图片数据给 UI
-            if (images.Count > 0)
-            {
-                EventCenter.Instance.TriggerEvent(EventName.LLMImages, images);
-            }
         }
     }
 
@@ -217,7 +270,7 @@ public class LLMChat : MonoBehaviour
     /// 解析 SSE 格式的 RAG 响应
     /// 处理 JSON 对象可能跨越多行的情况
     /// </summary>
-    private string ProcessRagSSEResponse(string response, List<ImageInfo> images)
+    private string ProcessRagSSEResponse(string response)
     {
         System.Text.StringBuilder messageContent = new System.Text.StringBuilder();
         string[] lines = response.Split(new[] { "\r\n", "\n" }, System.StringSplitOptions.None);
@@ -260,14 +313,14 @@ public class LLMChat : MonoBehaviour
                     if (braceDepth == 0 && pendingJsonBuffer.Length > 0)
                     {
                         string dataJson = pendingJsonBuffer.ToString();
-                        ProcessSingleRagEvent(currentEvent, dataJson, messageContent, images);
+                        ProcessSingleRagEvent(currentEvent, dataJson, messageContent);
                         pendingJsonBuffer.Clear();
                     }
                 }
                 else
                 {
                     // 直接处理单行完整 JSON
-                    ProcessSingleRagEvent(currentEvent, dataSegment, messageContent, images);
+                    ProcessSingleRagEvent(currentEvent, dataSegment, messageContent);
                 }
             }
         }
@@ -278,7 +331,7 @@ public class LLMChat : MonoBehaviour
     /// <summary>
     /// 处理单个 RAG SSE 事件
     /// </summary>
-    private void ProcessSingleRagEvent(string eventType, string dataJson, System.Text.StringBuilder messageContent, List<ImageInfo> images)
+    private void ProcessSingleRagEvent(string eventType, string dataJson, System.Text.StringBuilder messageContent)
     {
         try
         {
@@ -320,7 +373,7 @@ public class LLMChat : MonoBehaviour
                         RagCitationsData citationsData = JsonUtility.FromJson<RagCitationsData>(dataJson);
                         if (citationsData?.items != null)
                         {
-                            ExtractImagesFromCitations(citationsData.items, images);
+                            AppendCitationImages(citationsData.items, messageContent);
                             Debug.Log($"[LLMChat] 收到 {citationsData.items.Length} 个引文项目");
                         }
                     }
@@ -349,31 +402,34 @@ public class LLMChat : MonoBehaviour
     }
 
     /// <summary>
-    /// 从引文项目中提取图片信息
+    /// 将引文中的图片转为 Markdown 图片语法写入 messageContent，实现图文混排
+    /// 已存在于 messageContent 中的图片 URL 跳过，避免重复
     /// </summary>
-    private void ExtractImagesFromCitations(CitationItem[] items, List<ImageInfo> images)
+    private void AppendCitationImages(CitationItem[] items, System.Text.StringBuilder messageContent)
     {
+        string existingContent = messageContent.ToString();
+
         foreach (var item in items)
         {
             if (item.type == "image" && item.metadata != null)
             {
-                // 优先使用 image_uri，如果没有则使用 local_path
                 string imageUrl = !string.IsNullOrEmpty(item.metadata.image_uri)
                     ? item.metadata.image_uri
                     : item.metadata.local_path;
 
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    var imageInfo = new ImageInfo
+                    // 精确检查 messageContent 中是否已有该 URL 的 Markdown 图片语法
+                    string escapedUrl = Regex.Escape(imageUrl);
+                    if (Regex.IsMatch(existingContent, @"!\[[^\]]*\]\(" + escapedUrl + @"\)"))
                     {
-                        id = item.id,
-                        title = item.metadata.title ?? item.content,
-                        imageUrl = imageUrl,
-                        altText = item.metadata.alt_text ?? item.content,
-                        score = item.score
-                    };
-                    images.Add(imageInfo);
-                    Debug.Log($"[LLMChat] 提取图片: {imageInfo.title} ({imageUrl})");
+                        Debug.Log($"[LLMChat] 图片已存在于响应中，跳过: {imageUrl}");
+                        continue;
+                    }
+
+                    string title = item.metadata.title ?? item.content ?? "图片";
+                    messageContent.Append($"\n\n![{title}]({imageUrl})\n\n");
+                    Debug.Log($"[LLMChat] 嵌入图片: {title} ({imageUrl})");
                 }
             }
         }

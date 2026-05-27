@@ -29,6 +29,7 @@ public class DebugAutoPlay : MonoBehaviour
     private InteractPanel _interactPanel;
     private GameObject _loadedModel;
     private System.Action<string> _modelLoadedCallback;
+    private bool _modelLoadFinished = false;
 
     private void Start()
     {
@@ -56,6 +57,9 @@ public class DebugAutoPlay : MonoBehaviour
 
         // 步骤 1：等待主面板加载
         yield return StartCoroutine(WaitForMainPanelLoad());
+
+        // 步骤 2 前置：先注册模型加载事件监听器（必须在点击按钮之前，避免竞态条件）
+        RegisterModelLoadListener();
 
         // 步骤 2：点击主面板第一个按钮
         yield return StartCoroutine(ClickFirstButton());
@@ -145,6 +149,28 @@ public class DebugAutoPlay : MonoBehaviour
     }
 
     /// <summary>
+    /// 步骤 2 前置：先注册模型加载事件监听器，避免竞态条件
+    /// </summary>
+    private void RegisterModelLoadListener()
+    {
+        Debug.Log("[DebugAutoPlay] 注册 ModelLoadFinish 事件监听（在点击按钮之前）...");
+        _modelLoadFinished = false;
+        _modelLoadedCallback = (modelName) =>
+        {
+            Debug.Log($"[DebugAutoPlay] ✓ 事件收到 - 模型加载完成：{modelName}");
+            _loadedModel = GameObject.Find(modelName);
+            if (_loadedModel == null)
+                _loadedModel = GameObject.Find(modelName + "(Clone)");
+            if (_loadedModel == null)
+                _loadedModel = FindGameObjectByNameInScene(modelName);
+            if (_loadedModel == null)
+                _loadedModel = FindGameObjectByNameInScene(modelName.Replace("(Clone)", ""));
+            _modelLoadFinished = true;
+        };
+        EventCenter.Instance.AddListener<string>(EventName.ModelLoadFinish, _modelLoadedCallback);
+    }
+
+    /// <summary>
     /// 步骤 3：等待模型加载完成
     /// </summary>
     private IEnumerator WaitForModelLoad()
@@ -153,39 +179,7 @@ public class DebugAutoPlay : MonoBehaviour
         float elapsedTime = 0f;
         float timeout = 15f;
 
-        // 监听模型加载事件
-        bool modelLoaded = false;
-        _modelLoadedCallback = (modelName) =>
-        {
-            Debug.Log($"[DebugAutoPlay] ✓ 事件收到 - 模型加载完成：{modelName}");
-            // 获取加载的模型根节点
-            _loadedModel = GameObject.Find(modelName);
-
-            // 如果找不到，尝试加上 (Clone) 后缀（Addressables 加载的预制体会自动添加）
-            if (_loadedModel == null)
-            {
-                _loadedModel = GameObject.Find(modelName + "(Clone)");
-            }
-
-            // 如果还是找不到，从场景层级中查找
-            if (_loadedModel == null)
-            {
-                _loadedModel = FindGameObjectByNameInScene(modelName);
-            }
-
-            // 最后尝试模糊查找（如果上面都失败）
-            if (_loadedModel == null)
-            {
-                _loadedModel = FindGameObjectByNameInScene(modelName.Replace("(Clone)", ""));
-            }
-
-            modelLoaded = true;
-        };
-
-        Debug.Log("[DebugAutoPlay] 注册 ModelLoadFinish 事件监听...");
-        EventCenter.Instance.AddListener<string>(EventName.ModelLoadFinish, _modelLoadedCallback);
-
-        while (!modelLoaded && elapsedTime < timeout)
+        while (!_modelLoadFinished && elapsedTime < timeout)
         {
             elapsedTime += modelCheckInterval;
             yield return new WaitForSeconds(modelCheckInterval);
@@ -194,7 +188,7 @@ public class DebugAutoPlay : MonoBehaviour
         EventCenter.Instance.RemoveListener<string>(EventName.ModelLoadFinish, _modelLoadedCallback);
 
         // 如果事件没有被触发，尝试直接从场景中查找模型
-        if (!modelLoaded)
+        if (!_modelLoadFinished)
         {
             Debug.LogWarning("[DebugAutoPlay] ⚠ 事件超时，尝试直接从场景查找模型...");
             // 查找任何包含 InteractPanel 的模型（说明模型已加载）
@@ -204,7 +198,7 @@ public class DebugAutoPlay : MonoBehaviour
                 // 找到 InteractPanel，说明模型已加载，获取其根节点
                 _loadedModel = _interactPanel.transform.root.gameObject;
                 Debug.Log($"[DebugAutoPlay] ✓ 从 InteractPanel 获取到模型：{_loadedModel.name}");
-                modelLoaded = true;
+                _modelLoadFinished = true;
             }
             else
             {

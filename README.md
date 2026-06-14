@@ -120,7 +120,4 @@ RAG_API_URL=http://127.0.0.1:8080/ar/chat
 ---
 
 ## 注意事项
-
-- 本项目为个人学习项目，架构从简，不追求复杂设计
-- 代码中 `Assets/Scripts/CodeArchitect/` 为自研基础框架（单例、事件中心、面板管理、资源加载等），开箱即用
-- Meta XR SDK 包版本已锁定，升级时请同步更新 `Packages/manifest.json` 与本 README
+- 本项目为个人学习项目，架构从简

@@ -1,5 +1,8 @@
 # Unity — https://github.com/github/gitignore/blob/main/Unity.gitignore
+# 敏感配置文件（含 API 密钥等）
 .env
+**/.env
+RuntimeActionBindings.json
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
